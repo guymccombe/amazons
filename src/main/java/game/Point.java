@@ -34,9 +34,12 @@ public class Point implements PointInterface {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + x;
-        hash = 31 * hash + y;
-        return hash;
+        return 256 * x + y;
+    }
+
+    @Override
+    public String toString() {
+        String out = "(" + x + ", " + y + ")";
+        return out;
     }
 }
