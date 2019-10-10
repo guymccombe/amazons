@@ -62,35 +62,63 @@ public class BoardTest {
         assertTrue(result);
     }
 
-    @Test(expected = PointOutOfBoundsException.class)
-    public void getTargetFromOOBPointThrowsException() throws PointOutOfBoundsException, InvalidMoveException {
-        PointInterface point = new Point(-1,-1);
-        board.getArrayOfValidTargetsFromPoint(point);
+    @Test
+    public void selectAmazonWithValidParameters() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
+        BoardInterface myBoard = new Board(1);
+        PointInterface point = new Point(0,0);
+        myBoard.placeAmazonsAtPoints(new PointInterface[]{point});
+        myBoard.selectAmazonAtPoint(point);
     }
 
-    @Test(expected = InvalidMoveException.class)
-    public void getTargetFromNonAmazonPointThrowsException() throws PointOutOfBoundsException, InvalidMoveException {
-        PointInterface point = new Point(0,0);
-        board.getArrayOfValidTargetsFromPoint(point);
-        assertTrue(board.getCellStatusAtPoint(point) != CellStatus.AMAZON);
+    @Test(expected = PointOutOfBoundsException.class)
+    public void selectAmazonWithOOBPointThrowsException() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
+        PointInterface point = new Point(-1, -1);
+        board.selectAmazonAtPoint(point);
+    }
+
+    @Test(expected = AmazonSelectionException.class)
+    public void selectNonExistantAmazonThrowsException() throws PointOutOfBoundsException, AmazonSelectionException {
+        PointInterface point = new Point(0, 0);
+        board.selectAmazonAtPoint(point);
     }
 
     @Test
-    public void getTargetOnFullBoardReturnsEmptyArray() throws PointOutOfBoundsException, OverlappingAmazonsException, InvalidMoveException {
+    public void deselectAmazonAfterSelecting() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
+        BoardInterface myBoard = new Board(1);
+        PointInterface point = new Point(0, 0);
+        myBoard.placeAmazonsAtPoints(new PointInterface[]{point});
+        myBoard.selectAmazonAtPoint(point);
+        myBoard.deselectAmazon();
+    }
+
+    @Test(expected = AmazonSelectionException.class)
+    public void deselectAmazonWithNoSelection() throws AmazonSelectionException {
+        board.deselectAmazon();
+    }
+    
+    @Test(expected = AmazonSelectionException.class)
+    public void getTargetWithoutSelectingThrowsException() throws AmazonSelectionException, PointOutOfBoundsException {
+        board.getValidTargetsAroundSelectedAmazon();
+    }
+
+    @Test
+    public void getTargetOnFullBoardReturnsEmptyArray() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
         BoardInterface smallBoard = new Board(1);
         PointInterface point = new Point(0,0);
         smallBoard.placeAmazonsAtPoints(new PointInterface[]{point});
-        PointInterface[] targets = smallBoard.getArrayOfValidTargetsFromPoint(point);
+        smallBoard.selectAmazonAtPoint(point);
+        PointInterface[] targets = smallBoard.getValidTargetsAroundSelectedAmazon();
         assertTrue(targets.length == 0);
     }
 
     @Test
-    public void getTargetOnEmptyBoardReturnsStarShape() throws PointOutOfBoundsException, OverlappingAmazonsException, InvalidMoveException {
+    public void getTargetOnEmptyBoardReturnsStarShape() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
         BoardInterface emptyBoard = new Board(5);
         PointInterface point = new Point(2,2);
         emptyBoard.placeAmazonsAtPoints(new PointInterface[]{point});
+        emptyBoard.selectAmazonAtPoint(point);
 
-        PointInterface[] targets = emptyBoard.getArrayOfValidTargetsFromPoint(point);
+        PointInterface[] targets = emptyBoard.getValidTargetsAroundSelectedAmazon();
         PointInterface[] expected = new PointInterface[]{
             new Point(0, 0), new Point(2, 0), new Point(4, 0),
             new Point(1, 1), new Point(2, 1), new Point(3, 1),
@@ -106,12 +134,13 @@ public class BoardTest {
     }
 
     @Test
-    public void getTargetOnBoardWithBlockers() throws PointOutOfBoundsException, OverlappingAmazonsException, InvalidMoveException {
+    public void getTargetOnBoardWithBlockers() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
         BoardInterface boardWithBlockers = new Board(5);
         PointInterface searchPoint = new Point(2,2);
         boardWithBlockers.placeAmazonsAtPoints(new PointInterface[]{searchPoint, new Point(1,1), new Point(2,4)});
+        boardWithBlockers.selectAmazonAtPoint(searchPoint);
 
-        PointInterface[] targets = boardWithBlockers.getArrayOfValidTargetsFromPoint(searchPoint);
+        PointInterface[] targets = boardWithBlockers.getValidTargetsAroundSelectedAmazon();
         PointInterface[] expected = new PointInterface[]{
                                 new Point(2, 0), new Point(4, 0),
                                 new Point(2, 1), new Point(3, 1),
@@ -124,6 +153,5 @@ public class BoardTest {
         HashSet<PointInterface> expectedAsHashSet = new HashSet<PointInterface>(Arrays.asList(expected));
 
         assertTrue(targetsAsHashSet.equals(expectedAsHashSet));
-
     }
 }

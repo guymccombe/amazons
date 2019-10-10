@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Board implements BoardInterface {
     private CellInterface[][] cells;
     private PointInterface[] currentTargets = null;
+    private PointInterface pointOfSelected = null;
     
     public Board() {
         cells = new CellInterface[10][10];
@@ -90,50 +91,77 @@ public class Board implements BoardInterface {
             setCellStatusAtPoint(point, CellStatus.EMPTY);
         }
     }
-
-    public PointInterface[] getArrayOfValidTargetsFromPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
-        if (isPointWithinBoard(point)) {
+    
+    public void selectAmazonAtPoint(PointInterface point) throws PointOutOfBoundsException, AmazonSelectionException {
+        if (pointOfSelected == null) {
             if (getCellStatusAtPoint(point) == CellStatus.AMAZON) {
-                ArrayList<PointInterface> outList = new ArrayList<>();
-
-                outList.addAll(pollInXYDirection(point, 0,-1));
-                outList.addAll(pollInXYDirection(point, 1,-1));
-                outList.addAll(pollInXYDirection(point, 1, 0));
-                outList.addAll(pollInXYDirection(point, 1, 1));
-                outList.addAll(pollInXYDirection(point, 0, 1));
-                outList.addAll(pollInXYDirection(point,-1, 1));
-                outList.addAll(pollInXYDirection(point,-1, 0));
-                outList.addAll(pollInXYDirection(point,-1,-1));
-
-                int size = outList.size();
-                currentTargets = new PointInterface[size];
-                for (int i = 0; i < size; i++) {
-                    currentTargets[i] = outList.get(i);
-                }
-                return currentTargets;
+                pointOfSelected = point;
             } else {
-                throw new InvalidMoveException("Tried to get a target from a non Amazon Cell at point: " + point.toString());
+                throw new AmazonSelectionException("Targeted point is not an Amazon.");
             }
         } else {
-            throw new PointOutOfBoundsException(point);
+            throw new AmazonSelectionException("An Amazon is already selected.");
+        }
+
+    }
+
+    public void deselectAmazon() throws AmazonSelectionException {
+        if (pointOfSelected != null) {
+            pointOfSelected = null;
+        } else {
+            throw new AmazonSelectionException("No Amazon is selected.");
+        }
+
+    }
+    
+    public PointInterface[] getValidTargetsAroundSelectedAmazon() throws AmazonSelectionException, PointOutOfBoundsException {
+        if (pointOfSelected != null) {
+            ArrayList<PointInterface> outList = new ArrayList<>();
+            outList.addAll(pollInXYDirection( 0,-1));
+            outList.addAll(pollInXYDirection( 1,-1));
+            outList.addAll(pollInXYDirection( 1, 0));
+            outList.addAll(pollInXYDirection( 1, 1));
+            outList.addAll(pollInXYDirection( 0, 1));
+            outList.addAll(pollInXYDirection(-1, 1));
+            outList.addAll(pollInXYDirection(-1, 0));
+            outList.addAll(pollInXYDirection(-1,-1));
+    
+            int size = outList.size();
+            currentTargets = new PointInterface[size];
+            for (int i = 0; i < size; i++) {
+                currentTargets[i] = outList.get(i);
+            }
+            return currentTargets;
+        } else {
+            throw new AmazonSelectionException("No Amazon is selected.");
         }
     }
 
-    public ArrayList<PointInterface> pollInXYDirection(PointInterface startingPoint, int xIncrement, int yIncrement) throws PointOutOfBoundsException {
-        int i = startingPoint.getX() + xIncrement, j = startingPoint.getY() + yIncrement;
+    private ArrayList<PointInterface> pollInXYDirection(int xIncrement, int yIncrement) throws PointOutOfBoundsException {
+        int x = pointOfSelected.getX() + xIncrement, y = pointOfSelected.getY() + yIncrement;
         ArrayList<PointInterface> outList = new ArrayList<>();
 
-        while (i > -1 && i < getMaximumX() && j > -1 && j < getMaximumY()) {
-            PointInterface currentPointBeingPolled = new Point(i, j);
-            System.out.println("Polling the point: " + currentPointBeingPolled.toString());
+        while (x > -1 && x < getMaximumX() && y > -1 && y < getMaximumY()) {
+            PointInterface currentPointBeingPolled = new Point(x, y);
             if (getCellStatusAtPoint(currentPointBeingPolled) == CellStatus.EMPTY) {
                 outList.add(currentPointBeingPolled);
-                i += xIncrement;
-                j += yIncrement;
+                x += xIncrement;
+                y += yIncrement;
             } else {
                 return outList;
             }
         }
         return outList;
+    }
+
+    public void moveSelectedAmazonToPoint(PointInterface point)
+            throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void shootAtPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
+        // TODO Auto-generated method stub
+
     }
 }

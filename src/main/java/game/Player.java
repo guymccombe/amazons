@@ -22,7 +22,7 @@ public class Player implements PlayerInterface {
     public void selectActiveAmazonAtPoint(PointInterface point){}
     public void deselectActiveAmazon(){}
     public PointInterface[] getPointsOfValidMoves(){return null;}
-    public void moveActiveAmazonToPoint(PointInterface point) throws InvalidMoveException{}
+    public void moveActiveAmazonToPoint(PointInterface point) throws AmazonSelectionException{}
     public PointInterface[] getPointsOfValidShots(){return null;}
-    public void shootAtPoint(PointInterface point) throws InvalidMoveException{}
+    public void shootAtPoint(PointInterface point) throws AmazonSelectionException{}
 }
