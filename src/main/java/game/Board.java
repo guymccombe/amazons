@@ -1,37 +1,65 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class Board implements BoardInterface {
     private CellInterface[][] cells;
-    private PointInterface[] currentTargets = null;
-    private PointInterface pointOfSelected = null;
-    
+    private PointInterface[] currentTargets;
+    private PointInterface pointOfSelected;
+    private MoveStatus nextMove = MoveStatus.WHITE_MOVE;
+    private ArrayList<PointInterface> pointsOfWhiteAmazons = new ArrayList<>();
+    private ArrayList<PointInterface> pointsOfBlackAmazons = new ArrayList<>();
+    private Boolean isWhiteTheWinner = null;
+
     public Board() {
         cells = new CellInterface[10][10];
-        initialiseCells();
+
+        Placement[] defaultPlacement = new Placement[]{
+            new Placement(new Point(3,0), true), new Placement(new Point(6,0), true),
+            new Placement(new Point(0,3), true), new Placement(new Point(9,3), true),
+            new Placement(new Point(3,9), false), new Placement(new Point(6,9), false),
+            new Placement(new Point(0,6), false), new Placement(new Point(9,6), false)
+        };
+
+        initialiseCells(defaultPlacement);
     }
 
-    public Board(int dimension) {
+    public Board(int dimension, Placement[] amazonPlacements) {
         cells = new CellInterface[dimension][dimension];
-        initialiseCells();
+        initialiseCells(amazonPlacements);
     }
 
-    public Board(int xLength, int yLength) {
+    public Board(int xLength, int yLength, Placement[] amazonPlacements) {
         cells = new CellInterface[yLength][xLength];
-        initialiseCells();
+        initialiseCells(amazonPlacements);
     }
 
-    private void initialiseCells() {
+    private void initialiseCells(Placement[] placements) {
         for (int i = 0; i < cells.length; i++) {
             CellInterface[] row = cells[i];
             for (int j = 0; j < row.length; j++) {
                 row[j] = new Cell();
             }
         }
+
+        try {
+            for (Placement placement : placements) {
+                if (placement.isWhite()) {
+                    setCellStatusAtPoint(placement.getPoint(), CellStatus.WHITE_AMAZON);
+                    pointsOfWhiteAmazons.add(placement.getPoint());
+                } else {
+                    setCellStatusAtPoint(placement.getPoint(), CellStatus.BLACK_AMAZON);
+                    pointsOfBlackAmazons.add(placement.getPoint());
+                }
+            }
+        } catch (PointOutOfBoundsException oobException) {
+            System.err.println(oobException.getMessage());
+        }
     }
 
-    public CellStatus getCellStatusAtPoint(PointInterface point) throws PointOutOfBoundsException {
+    private CellStatus getCellStatusAtPoint(PointInterface point) throws PointOutOfBoundsException {
         if (isPointWithinBoard(point)) {
             CellInterface cell = cells[point.getY()][point.getX()];
             CellStatus status = cell.getStatus();
@@ -67,78 +95,52 @@ public class Board implements BoardInterface {
             throw new PointOutOfBoundsException(point);
         }
     }
-
-    public void placeAmazonsAtPoints(PointInterface[] points) throws OverlappingAmazonsException, PointOutOfBoundsException{
-        for (int i = 0; i < points.length; i++) {
-            PointInterface point = points[i];
-            try {
-                if (getCellStatusAtPoint(point) == CellStatus.EMPTY) {
-                    setCellStatusAtPoint(point, CellStatus.AMAZON);
-                } else {
-                    undoPlacementOfAmazons(points, i);
-                    throw new OverlappingAmazonsException("Placement of amazon at point: " + point.toString() + " failed as the Cell is not empty.");
-                }
-            } catch (PointOutOfBoundsException e) {
-                undoPlacementOfAmazons(points, i);
-                throw e;
-            }
-        }
-    }
-
-    private void undoPlacementOfAmazons(PointInterface[] points, int indexOfFailedPlacement) throws PointOutOfBoundsException{
-        for (int i = 0; i < indexOfFailedPlacement; i++) {
-            PointInterface point = points[i];
-            setCellStatusAtPoint(point, CellStatus.EMPTY);
-        }
-    }
     
-    public void selectAmazonAtPoint(PointInterface point) throws PointOutOfBoundsException, AmazonSelectionException {
-        if (pointOfSelected == null) {
-            if (getCellStatusAtPoint(point) == CellStatus.AMAZON) {
+    public PointInterface[] selectAmazonAtPointAndReturnMoveTargets(PointInterface point) throws PointOutOfBoundsException, AmazonSelectionException {
+        if (nextMove == MoveStatus.WHITE_MOVE || nextMove == MoveStatus.BLACK_MOVE) {
+            if ((nextMove == MoveStatus.WHITE_MOVE && getCellStatusAtPoint(point) == CellStatus.WHITE_AMAZON)
+            ||  (nextMove == MoveStatus.BLACK_MOVE && getCellStatusAtPoint(point) == CellStatus.BLACK_AMAZON)) {
                 pointOfSelected = point;
+                currentTargets = getValidTargetsAroundSelectedAmazon();
+                return currentTargets;
             } else {
-                throw new AmazonSelectionException("Targeted point is not an Amazon.");
+                throw new AmazonSelectionException("Targeted point is not an Amazon or is the wrong colour.");
             }
         } else {
-            throw new AmazonSelectionException("An Amazon is already selected.");
-        }
-
-    }
-
-    public void deselectAmazon() throws AmazonSelectionException {
-        if (pointOfSelected != null) {
-            pointOfSelected = null;
-        } else {
-            throw new AmazonSelectionException("No Amazon is selected.");
+            throw new AmazonSelectionException("You cannot select an Amazon during the shooting stage of a move.");
         }
 
     }
     
-    public PointInterface[] getValidTargetsAroundSelectedAmazon() throws AmazonSelectionException, PointOutOfBoundsException {
+    private PointInterface[] getValidTargetsAroundSelectedAmazon() throws AmazonSelectionException, PointOutOfBoundsException {
         if (pointOfSelected != null) {
-            ArrayList<PointInterface> outList = new ArrayList<>();
-            outList.addAll(pollInXYDirection( 0,-1));
-            outList.addAll(pollInXYDirection( 1,-1));
-            outList.addAll(pollInXYDirection( 1, 0));
-            outList.addAll(pollInXYDirection( 1, 1));
-            outList.addAll(pollInXYDirection( 0, 1));
-            outList.addAll(pollInXYDirection(-1, 1));
-            outList.addAll(pollInXYDirection(-1, 0));
-            outList.addAll(pollInXYDirection(-1,-1));
-    
-            int size = outList.size();
-            currentTargets = new PointInterface[size];
-            for (int i = 0; i < size; i++) {
-                currentTargets[i] = outList.get(i);
-            }
-            return currentTargets;
+            return getValidTargetsAroundPoint(pointOfSelected);
         } else {
             throw new AmazonSelectionException("No Amazon is selected.");
         }
     }
 
-    private ArrayList<PointInterface> pollInXYDirection(int xIncrement, int yIncrement) throws PointOutOfBoundsException {
-        int x = pointOfSelected.getX() + xIncrement, y = pointOfSelected.getY() + yIncrement;
+    private PointInterface[] getValidTargetsAroundPoint(PointInterface point) throws PointOutOfBoundsException {
+        ArrayList<PointInterface> outList = new ArrayList<>();
+        outList.addAll(pollInXYDirection( 0,-1, point));
+        outList.addAll(pollInXYDirection( 1,-1, point));
+        outList.addAll(pollInXYDirection( 1, 0, point));
+        outList.addAll(pollInXYDirection( 1, 1, point));
+        outList.addAll(pollInXYDirection( 0, 1, point));
+        outList.addAll(pollInXYDirection(-1, 1, point));
+        outList.addAll(pollInXYDirection(-1, 0, point));
+        outList.addAll(pollInXYDirection(-1,-1, point));
+    
+        int size = outList.size();
+        PointInterface[] targets = new PointInterface[size];
+        for (int i = 0; i < size; i++) {
+            targets[i] = outList.get(i);
+        }
+        return targets;
+    }
+
+    private ArrayList<PointInterface> pollInXYDirection(int xIncrement, int yIncrement, PointInterface point) throws PointOutOfBoundsException {
+        int x = point.getX() + xIncrement, y = point.getY() + yIncrement;
         ArrayList<PointInterface> outList = new ArrayList<>();
 
         while (x > -1 && x < getMaximumX() && y > -1 && y < getMaximumY()) {
@@ -154,14 +156,91 @@ public class Board implements BoardInterface {
         return outList;
     }
 
-    public void moveSelectedAmazonToPoint(PointInterface point)
-            throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
-        // TODO Auto-generated method stub
-
+    public PointInterface[] moveSelectedAmazonToPointAndReturnShootTargets(PointInterface point) throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        if (pointOfSelected != null) {
+            if ((getCellStatusAtPoint(pointOfSelected) == CellStatus.WHITE_AMAZON && nextMove == MoveStatus.WHITE_MOVE)
+            ||  (getCellStatusAtPoint(pointOfSelected) == CellStatus.BLACK_AMAZON && nextMove == MoveStatus.BLACK_MOVE)) {
+                HashSet<PointInterface> targetsAsSet = new HashSet<>(Arrays.asList(currentTargets));
+                if (targetsAsSet.contains(point)) {
+                    setCellStatusAtPoint(point, getCellStatusAtPoint(pointOfSelected));
+                    setCellStatusAtPoint(pointOfSelected, CellStatus.EMPTY);
+                    if (nextMove == MoveStatus.WHITE_MOVE) {
+                        pointsOfWhiteAmazons.remove(pointOfSelected);
+                        pointsOfWhiteAmazons.add(point);
+                        nextMove = MoveStatus.WHITE_SHOOT;
+                    } else {
+                        pointsOfBlackAmazons.remove(pointOfSelected);
+                        pointsOfBlackAmazons.add(point);
+                        nextMove = MoveStatus.BLACK_SHOOT;
+                    }
+                    pointOfSelected = point;
+                    currentTargets = getValidTargetsAroundSelectedAmazon();
+                    return currentTargets;
+                } else {
+                    throw new InvalidMoveException("The point: " + point.toString() + " is not a valid target.");
+                }
+            } else {
+                throw new InvalidMoveException("It is not your turn to move an Amazon.");
+            }
+        } else {
+            throw new AmazonSelectionException("You cannot move without selecting an Amazon.");
+        }
     }
 
     public void shootAtPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
-        // TODO Auto-generated method stub
+        if ((getCellStatusAtPoint(pointOfSelected) == CellStatus.WHITE_AMAZON && nextMove == MoveStatus.WHITE_SHOOT)
+         || (getCellStatusAtPoint(pointOfSelected) == CellStatus.BLACK_AMAZON && nextMove == MoveStatus.BLACK_SHOOT)) {
+            HashSet<PointInterface> targetsAsSet = new HashSet<>(Arrays.asList(currentTargets));
+            if (targetsAsSet.contains(point)) {
+                setCellStatusAtPoint(point, CellStatus.ARROW);
+                pointOfSelected = null;
+                currentTargets = null;
+                nextMove = (nextMove == MoveStatus.WHITE_SHOOT) ? MoveStatus.BLACK_MOVE : MoveStatus.WHITE_MOVE;
+            } else {
+                throw new InvalidMoveException("The point: " + point.toString() + " is not a valid target.");
+            }
+        } else {
+            throw new InvalidMoveException("It is not your turn to shoot.");        
+        }
 
+    }
+
+    public boolean isGameFinished() {
+        try {
+            if (nextMove == MoveStatus.BLACK_SHOOT || nextMove == MoveStatus.WHITE_SHOOT) {
+                return false;
+            }
+            if (nextMove == MoveStatus.WHITE_MOVE) {
+                boolean gameOver = true;
+                for (PointInterface pointOfAmazon : pointsOfWhiteAmazons) {
+                    gameOver &= (getValidTargetsAroundPoint(pointOfAmazon).length == 0);
+                }
+                if (gameOver) {
+                    isWhiteTheWinner = false;
+                }
+                return gameOver;
+            } else {
+                boolean gameOver = true;
+                for (PointInterface pointOfAmazon : pointsOfBlackAmazons) {
+                    gameOver &= (getValidTargetsAroundPoint(pointOfAmazon).length == 0);
+                }
+                if (gameOver) {
+                    isWhiteTheWinner = true;
+                }
+                return gameOver;
+            }
+        } catch (PointOutOfBoundsException pointOutOfBoundsException) {
+            System.err.println(pointOutOfBoundsException.getMessage() + "\n This should never occur! Check the storage of amazons.");
+            return true;
+        }
+    }
+
+
+    public boolean isWhiteTheWinner() throws GameInProgressException {
+        if (isWhiteTheWinner != null) {
+            return isWhiteTheWinner;
+        } else {
+            throw new GameInProgressException("The game hasn't finished yet.");
+        }
     }
 }

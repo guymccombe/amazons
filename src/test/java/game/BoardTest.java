@@ -9,116 +9,69 @@ import org.junit.Test;
 
 public class BoardTest {
 
-    BoardInterface board = new Board(10);
-
-    @Test(expected = PointOutOfBoundsException.class)
-    public void getStatusWithNegativePointThrowsException() throws PointOutOfBoundsException {
-        PointInterface point = new Point(-1, -1);
-        board.getCellStatusAtPoint(point);
-    }
-
-    @Test(expected = PointOutOfBoundsException.class)
-    public void getStatusPointLargerThanBoundsThrowsException() throws PointOutOfBoundsException {
-        PointInterface point = new Point(10, 10);
-        board.getCellStatusAtPoint(point);
-    }
+    BoardInterface board = new Board();
 
     @Test
-    public void getStatusInBounds() throws PointOutOfBoundsException {
-        PointInterface point = new Point(0, 0);
-        CellStatus status = board.getCellStatusAtPoint(point);
-        assertTrue(status != null);
-    }
-
-    @Test(expected = OverlappingAmazonsException.class)
-    public void placingOverlappingAmazonsThrowsException() throws OverlappingAmazonsException, PointOutOfBoundsException {
+    public void selectAmazonWithValidParameters() throws PointOutOfBoundsException, AmazonSelectionException {
         PointInterface point = new Point(0,0);
-        board.placeAmazonsAtPoints(new PointInterface[]{point, point});
+        BoardInterface myBoard = new Board(1, new Placement[]{new Placement(point, true)});
+        myBoard.selectAmazonAtPointAndReturnMoveTargets(point);
     }
 
     @Test(expected = PointOutOfBoundsException.class)
-    public void placingAmazonOutOfBoundsThrowsException() throws OverlappingAmazonsException, PointOutOfBoundsException {
-        PointInterface point = new Point(-1,-1);
-        board.placeAmazonsAtPoints(new PointInterface[]{point});
-    }
-
-    @Test(expected = PointOutOfBoundsException.class)
-    public void incorrectPlacementResultsInNoChange() throws OverlappingAmazonsException, PointOutOfBoundsException {
-        PointInterface testPoint = new Point(1,2);
-        PointInterface invalidPoint = new Point(-1,-1);
-        PointInterface testPoint2 = new Point(2,1);
-        boolean result = true;
-        
-        result &= board.getCellStatusAtPoint(testPoint) == CellStatus.EMPTY;
-        result &= board.getCellStatusAtPoint(invalidPoint) == CellStatus.EMPTY;
-        result &= board.getCellStatusAtPoint(testPoint2) == CellStatus.EMPTY;
-
-        board.placeAmazonsAtPoints(new PointInterface[]{testPoint, invalidPoint, testPoint2});
-
-        result &= board.getCellStatusAtPoint(testPoint) == CellStatus.EMPTY;
-        result &= board.getCellStatusAtPoint(invalidPoint) == CellStatus.EMPTY;
-        result &= board.getCellStatusAtPoint(testPoint2) == CellStatus.EMPTY;
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void selectAmazonWithValidParameters() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
-        BoardInterface myBoard = new Board(1);
-        PointInterface point = new Point(0,0);
-        myBoard.placeAmazonsAtPoints(new PointInterface[]{point});
-        myBoard.selectAmazonAtPoint(point);
-    }
-
-    @Test(expected = PointOutOfBoundsException.class)
-    public void selectAmazonWithOOBPointThrowsException() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
+    public void selectAmazonWithOOBPointThrowsException() throws PointOutOfBoundsException, AmazonSelectionException {
         PointInterface point = new Point(-1, -1);
-        board.selectAmazonAtPoint(point);
+        board.selectAmazonAtPointAndReturnMoveTargets(point);
     }
 
     @Test(expected = AmazonSelectionException.class)
     public void selectNonExistantAmazonThrowsException() throws PointOutOfBoundsException, AmazonSelectionException {
         PointInterface point = new Point(0, 0);
-        board.selectAmazonAtPoint(point);
+        board.selectAmazonAtPointAndReturnMoveTargets(point);
     }
 
-    @Test
-    public void deselectAmazonAfterSelecting() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
-        BoardInterface myBoard = new Board(1);
+    @Test(expected = AmazonSelectionException.class)
+    public void selectBlackAmazonOnWhiteMoveThrowsException() throws PointOutOfBoundsException, AmazonSelectionException {
         PointInterface point = new Point(0, 0);
-        myBoard.placeAmazonsAtPoints(new PointInterface[]{point});
-        myBoard.selectAmazonAtPoint(point);
-        myBoard.deselectAmazon();
+        BoardInterface localBoard = new Board(1, new Placement[]{new Placement(point, false)});
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
     }
 
     @Test(expected = AmazonSelectionException.class)
-    public void deselectAmazonWithNoSelection() throws AmazonSelectionException {
-        board.deselectAmazon();
+    public void selectWhiteInsteadOfBlack() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        BoardInterface localBoard = new Board(2, new Placement[]{
+            new Placement(new Point(0,0), true), new Placement(new Point(1,1), false)
+        });
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,0));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(1,0));
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,1));
     }
+
+    @Test(expected = AmazonSelectionException.class)
+    public void selectAmazonInsteadOfShootingThrowsException() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        BoardInterface localBoard = new Board();
+        PointInterface[] targets = localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0, 3));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(targets[0]);
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(3, 0));
+    }
+
+
     
-    @Test(expected = AmazonSelectionException.class)
-    public void getTargetWithoutSelectingThrowsException() throws AmazonSelectionException, PointOutOfBoundsException {
-        board.getValidTargetsAroundSelectedAmazon();
-    }
-
     @Test
-    public void getTargetOnFullBoardReturnsEmptyArray() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
-        BoardInterface smallBoard = new Board(1);
+    public void getTargetOnFullBoardReturnsEmptyArray() throws PointOutOfBoundsException, AmazonSelectionException {
         PointInterface point = new Point(0,0);
-        smallBoard.placeAmazonsAtPoints(new PointInterface[]{point});
-        smallBoard.selectAmazonAtPoint(point);
-        PointInterface[] targets = smallBoard.getValidTargetsAroundSelectedAmazon();
+        BoardInterface smallBoard = new Board(1, new Placement[]{new Placement(point, true)});
+        PointInterface[] targets = smallBoard.selectAmazonAtPointAndReturnMoveTargets(point);
         assertTrue(targets.length == 0);
     }
 
     @Test
-    public void getTargetOnEmptyBoardReturnsStarShape() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
-        BoardInterface emptyBoard = new Board(5);
+    public void getTargetOnEmptyBoardReturnsStarShape() throws PointOutOfBoundsException, AmazonSelectionException {
         PointInterface point = new Point(2,2);
-        emptyBoard.placeAmazonsAtPoints(new PointInterface[]{point});
-        emptyBoard.selectAmazonAtPoint(point);
+        BoardInterface emptyBoard = new Board(5, new Placement[]{new Placement(point, true)});
+        PointInterface[] targets = emptyBoard.selectAmazonAtPointAndReturnMoveTargets(point);
 
-        PointInterface[] targets = emptyBoard.getValidTargetsAroundSelectedAmazon();
         PointInterface[] expected = new PointInterface[]{
             new Point(0, 0), new Point(2, 0), new Point(4, 0),
             new Point(1, 1), new Point(2, 1), new Point(3, 1),
@@ -134,13 +87,13 @@ public class BoardTest {
     }
 
     @Test
-    public void getTargetOnBoardWithBlockers() throws PointOutOfBoundsException, OverlappingAmazonsException, AmazonSelectionException {
-        BoardInterface boardWithBlockers = new Board(5);
-        PointInterface searchPoint = new Point(2,2);
-        boardWithBlockers.placeAmazonsAtPoints(new PointInterface[]{searchPoint, new Point(1,1), new Point(2,4)});
-        boardWithBlockers.selectAmazonAtPoint(searchPoint);
-
-        PointInterface[] targets = boardWithBlockers.getValidTargetsAroundSelectedAmazon();
+    public void getTargetOnBoardWithBlockers() throws PointOutOfBoundsException, AmazonSelectionException {
+        PointInterface searchPoint = new Point(2,2);        
+        Placement[] placements = new Placement[]{
+            new Placement(searchPoint, true), new Placement(new Point(1,1), true), new Placement(new Point(2,4), false)
+        };
+        BoardInterface boardWithBlockers = new Board(5, placements);
+        PointInterface[] targets = boardWithBlockers.selectAmazonAtPointAndReturnMoveTargets(searchPoint);
         PointInterface[] expected = new PointInterface[]{
                                 new Point(2, 0), new Point(4, 0),
                                 new Point(2, 1), new Point(3, 1),
@@ -153,5 +106,162 @@ public class BoardTest {
         HashSet<PointInterface> expectedAsHashSet = new HashSet<PointInterface>(Arrays.asList(expected));
 
         assertTrue(targetsAsHashSet.equals(expectedAsHashSet));
+    }
+
+
+
+
+    @Test
+    public void makeAValidMove() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        PointInterface point = new Point(0,0);
+        Placement[] placements = new Placement[]{new Placement(point, true)};
+        BoardInterface localBoard = new Board(2, placements);
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,1));
+    }
+
+    @Test(expected = InvalidMoveException.class)
+    public void moveOutOfBounds() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        BoardInterface localBoard = new Board();
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,3));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(-1,3));
+    }
+
+    @Test(expected = InvalidMoveException.class)
+    public void moveToAPositionNotInTarget() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        BoardInterface localBoard = new Board();
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,3));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,5));
+    }
+
+    @Test
+    public void cellIsEmptyAfterMovingFromIt() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        BoardInterface localBoard = new Board();
+        PointInterface point = new Point(0,3);
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
+        PointInterface[] targets = localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,4));
+        HashSet<PointInterface> targetsAsSet = new HashSet<>(Arrays.asList(targets));
+        assertTrue(targetsAsSet.contains(point));
+    }
+
+    @Test
+    public void validShot() throws PointOutOfBoundsException, AmazonSelectionException, InvalidMoveException {
+        PointInterface point = new Point(0,0);
+        BoardInterface localBoard = new Board(2, new Placement[]{new Placement(point, true)});
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(1,1));
+    }
+
+    @Test(expected = InvalidMoveException.class)
+    public void shootingOutOfBounds() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        PointInterface point = new Point(0,0);
+        BoardInterface localBoard = new Board(2, new Placement[]{new Placement(point, true)});
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(-1,1));
+    }
+
+    @Test(expected = InvalidMoveException.class)
+    public void shootingOutOfTargets() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        PointInterface point = new Point(0,0);
+        BoardInterface localBoard = new Board(3, new Placement[]{new Placement(point, true)});
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(2,2));
+    }
+
+    @Test
+    public void movedAmazonsAndFiredArrowsBlockTarget() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        PointInterface point = new Point(0,0);
+        BoardInterface localBoard = new Board(2, new Placement[]{new Placement(point, true), new Placement(new Point(1,1), false)});
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(point);
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(1,0));
+        
+        PointInterface[] targets = localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
+        HashSet<PointInterface> targetsAsSet = new HashSet<>(Arrays.asList(targets));
+        assertTrue(!targetsAsSet.contains(new Point(0,1)) && !targetsAsSet.contains(new Point(1,0)));
+    }
+
+
+
+    @Test
+    public void isGameFinishedOn0SizeBoard() {
+        BoardInterface localBoard = new Board(0, new Placement[0]);
+        assertTrue(localBoard.isGameFinished());
+    }
+
+    @Test
+    public void unfinishedGame() {
+        BoardInterface localBoard = new Board();
+        assertTrue(!localBoard.isGameFinished());
+    }
+
+    @Test
+    public void finishedGame() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        Placement[] placements = new Placement[]{
+            new Placement(new Point(0,0), true), new Placement(new Point(1,1), false)
+        };
+        BoardInterface localBoard = new Board(2, placements);
+
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,0));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,0));
+        localBoard.shootAtPoint(new Point(0,0));
+        
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(1,1));
+
+        assertTrue(localBoard.isGameFinished());
+    }
+
+
+
+    @Test
+    public void blackWins() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException, GameInProgressException {
+        Placement[] placements = new Placement[]{
+            new Placement(new Point(0,0), true), new Placement(new Point(1,1), false)
+        };
+        BoardInterface localBoard = new Board(2, placements);
+
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,0));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,0));
+        localBoard.shootAtPoint(new Point(0,0));
+        
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(1,1));
+
+        localBoard.isGameFinished();
+        assertTrue(!localBoard.isWhiteTheWinner());
+    }
+
+    @Test
+    public void whiteWins() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException, GameInProgressException {
+        Placement[] placements = new Placement[]{
+            new Placement(new Point(0,1), true), new Placement(new Point(1,0), false)
+        };
+        BoardInterface localBoard = new Board(3, placements);
+
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,1));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,1));
+        localBoard.shootAtPoint(new Point(0,1));
+        
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,0));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,0));
+        localBoard.shootAtPoint(new Point(1,0));
+
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(2,2));
+        localBoard.shootAtPoint(new Point(1,1));
+
+        localBoard.isGameFinished();
+        assertTrue(localBoard.isWhiteTheWinner());
+    }
+
+    @Test(expected = GameInProgressException.class)
+    public void testWinnerInUnfinishedGame() throws GameInProgressException {
+        board.isWhiteTheWinner();
     }
 }

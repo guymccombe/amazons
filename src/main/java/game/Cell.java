@@ -18,4 +18,4 @@ public class Cell implements CellInterface {
     public CellStatus getStatus() {
         return status;
     }
-};
+}

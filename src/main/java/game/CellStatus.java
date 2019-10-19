@@ -1,5 +1,5 @@
 package game;
 
 public enum CellStatus {
-    EMPTY, ARROW, AMAZON
+    EMPTY, ARROW, WHITE_AMAZON, BLACK_AMAZON
 }
