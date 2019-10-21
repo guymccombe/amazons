@@ -11,7 +11,7 @@ public class Board implements BoardInterface {
     private MoveStatus nextMove = MoveStatus.WHITE_MOVE;
     private ArrayList<PointInterface> pointsOfWhiteAmazons = new ArrayList<>();
     private ArrayList<PointInterface> pointsOfBlackAmazons = new ArrayList<>();
-    private Boolean isWhiteTheWinner = null;
+    private boolean isWhiteTheWinner;
 
     public Board() {
         cells = new CellInterface[10][10];
@@ -205,7 +205,7 @@ public class Board implements BoardInterface {
 
     }
 
-    public boolean isGameFinished() {
+    private boolean isGameFinished() {
         try {
             if (nextMove == MoveStatus.BLACK_SHOOT || nextMove == MoveStatus.WHITE_SHOOT) {
                 return false;
@@ -235,12 +235,11 @@ public class Board implements BoardInterface {
         }
     }
 
-
-    public boolean isWhiteTheWinner() throws GameInProgressException {
-        if (isWhiteTheWinner != null) {
+    public Boolean isWhiteTheWinner() {
+        if (isGameFinished()) {
             return isWhiteTheWinner;
         } else {
-            throw new GameInProgressException("The game hasn't finished yet.");
+            return null;
         }
     }
 }

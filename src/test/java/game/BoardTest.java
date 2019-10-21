@@ -189,56 +189,29 @@ public class BoardTest {
     @Test
     public void isGameFinishedOn0SizeBoard() {
         BoardInterface localBoard = new Board(0, new Placement[0]);
-        assertTrue(localBoard.isGameFinished());
-    }
-
-    @Test
-    public void unfinishedGame() {
-        BoardInterface localBoard = new Board();
-        assertTrue(!localBoard.isGameFinished());
-    }
-
-    @Test
-    public void finishedGame() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
-        Placement[] placements = new Placement[]{
-            new Placement(new Point(0,0), true), new Placement(new Point(1,1), false)
-        };
-        BoardInterface localBoard = new Board(2, placements);
-
-        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,0));
-        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,0));
-        localBoard.shootAtPoint(new Point(0,0));
-        
-        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
-        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
-        localBoard.shootAtPoint(new Point(1,1));
-
-        assertTrue(localBoard.isGameFinished());
-    }
-
-
-
-    @Test
-    public void blackWins() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException, GameInProgressException {
-        Placement[] placements = new Placement[]{
-            new Placement(new Point(0,0), true), new Placement(new Point(1,1), false)
-        };
-        BoardInterface localBoard = new Board(2, placements);
-
-        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,0));
-        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,0));
-        localBoard.shootAtPoint(new Point(0,0));
-        
-        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
-        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
-        localBoard.shootAtPoint(new Point(1,1));
-
-        localBoard.isGameFinished();
         assertTrue(!localBoard.isWhiteTheWinner());
     }
 
     @Test
-    public void whiteWins() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException, GameInProgressException {
+    public void blackWins() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+        Placement[] placements = new Placement[]{
+            new Placement(new Point(0,0), true), new Placement(new Point(1,1), false)
+        };
+        BoardInterface localBoard = new Board(2, placements);
+
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(0,0));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(1,0));
+        localBoard.shootAtPoint(new Point(0,0));
+        
+        localBoard.selectAmazonAtPointAndReturnMoveTargets(new Point(1,1));
+        localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(0,1));
+        localBoard.shootAtPoint(new Point(1,1));
+
+        assertTrue(!localBoard.isWhiteTheWinner());
+    }
+
+    @Test
+    public void whiteWins() throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
         Placement[] placements = new Placement[]{
             new Placement(new Point(0,1), true), new Placement(new Point(1,0), false)
         };
@@ -256,12 +229,11 @@ public class BoardTest {
         localBoard.moveSelectedAmazonToPointAndReturnShootTargets(new Point(2,2));
         localBoard.shootAtPoint(new Point(1,1));
 
-        localBoard.isGameFinished();
         assertTrue(localBoard.isWhiteTheWinner());
     }
 
-    @Test(expected = GameInProgressException.class)
-    public void testWinnerInUnfinishedGame() throws GameInProgressException {
-        board.isWhiteTheWinner();
+    @Test
+    public void testWinnerInUnfinishedGame() {
+        assertTrue(board.isWhiteTheWinner() == null);
     }
 }
