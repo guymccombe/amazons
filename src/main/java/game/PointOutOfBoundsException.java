@@ -1,6 +1,7 @@
 package game;
 
 public class PointOutOfBoundsException extends Exception {
+    private static final long serialVersionUID = 5983490295896645147L;
 
     public PointOutOfBoundsException(String message) {
         super(message);
