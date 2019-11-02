@@ -69,6 +69,16 @@ public class Board implements BoardInterface {
         }
     }
 
+    public CellStatus[][] getBoardStatuses() {
+        CellStatus[][] output = new CellStatus[cells.length][cells[0].length];
+        for (int i = 0; i < cells.length; i++) {
+            for (int j = 0; j < cells[0].length; j++) {
+                output[i][j] = cells[i][j].getStatus();
+            }
+        }
+        return output;
+    }
+
     private boolean isPointWithinBoard(PointInterface point) {
         boolean isPointWithinBoard = true;
         isPointWithinBoard &= point.getX() > -1;
