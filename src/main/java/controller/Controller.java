@@ -16,15 +16,8 @@ public class Controller {
     private BoardInterface model;
 
     public Controller(boolean useGUI) {
+        this.model = new Board();
         this.view = useGUI ? new GUI(this) : new CLI(this);
-        this.model = new Board();
-
-        startGameLoop();
-    }
-
-    public Controller(ViewInterface view) {
-        this.view = view;
-        this.model = new Board();
 
         startGameLoop();
     }
@@ -34,8 +27,9 @@ public class Controller {
         while (model.isWhiteTheWinner() == null) {
             view.displayATurn(isWhitesTurn);
             isWhitesTurn = !isWhitesTurn;
+            System.out.println(model.isWhiteTheWinner());
         }
-        view.displayWinner(model.isWhiteTheWinner());
+        view.displayWinner(true);
     }
 
     public CellStatus[][] getBoard() {
@@ -57,10 +51,11 @@ public class Controller {
     }
 
     public void newGame() {
-        new Controller(view);
+        new Controller(true);
     }
 
     public static void main(String args[]) {
-        new Controller(false);
+        //TODO use args to change between display modes
+        new Controller(true);
     }
 }
