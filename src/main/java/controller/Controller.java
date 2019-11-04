@@ -27,7 +27,6 @@ public class Controller {
         while (model.isWhiteTheWinner() == null) {
             view.displayATurn(isWhitesTurn);
             isWhitesTurn = !isWhitesTurn;
-            System.out.println(model.isWhiteTheWinner());
         }
         view.displayWinner(true);
     }

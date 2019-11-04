@@ -37,7 +37,7 @@ public class GUI implements ViewInterface {
 
     private Controller controller;
     private boolean waitingForShot;
-    private boolean isTurnOngoing;
+    private volatile boolean isTurnOngoing;
     private String playerName;
 
     public GUI(Controller controller) {
@@ -155,12 +155,12 @@ public class GUI implements ViewInterface {
     }
 
     public void displayATurn(boolean isWhiteTurn) {
-        //TODO investigate why turn loop doesn't progress
         isTurnOngoing = true;
         playerName = isWhiteTurn ? "WHITE" : "BLACK";
         turnStatus.setText(playerName + ", it is your turn to move!");
         updateBoard(new PointInterface[]{});
         while(isTurnOngoing);
+        System.out.printf("%s's turn is done.", playerName);
     }
 
     private void updateBoard(PointInterface[] targets) {
