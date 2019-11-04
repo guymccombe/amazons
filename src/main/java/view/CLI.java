@@ -135,6 +135,6 @@ public class CLI implements ViewInterface {
         String winnerName = winnerIsWhite ? "WHITE" : "BLACK";
         System.out.printf("Congratulions, %s, you are the winner!%n Press enter to restart.", winnerName);
         input.next();
-        controller.newGame();
+        controller.newGame(false);
     }
 }

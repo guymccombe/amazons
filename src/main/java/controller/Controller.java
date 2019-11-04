@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.Arrays;
+
 import game.AmazonSelectionException;
 import game.Board;
 import game.BoardInterface;
@@ -49,12 +51,15 @@ public class Controller {
         model.shootAtPoint(point);
     }
 
-    public void newGame() {
-        new Controller(true);
+    public void newGame(boolean useGUI) {
+        new Controller(useGUI);
     }
 
     public static void main(String args[]) {
-        //TODO use args to change between display modes
-        new Controller(true);
+        if (args.length > 0) {
+            new Controller(!Arrays.stream(args).anyMatch("-noGUI"::equals));
+        } else {
+            new Controller(true);
+        }
     }
 }

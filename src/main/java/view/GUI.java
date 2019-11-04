@@ -121,7 +121,7 @@ public class GUI implements ViewInterface {
             waitingForShot = false;
             isTurnOngoing = false;
         } catch (Exception e) {
-            System.out.printf("Click at point %s ignored. It is %s's turn and waiting for shot is %b.%n", point.toString(), playerName, waitingForShot);
+            System.out.printf("Click at point %s ignored.%n", point.toString());
         }
     }
 
@@ -136,7 +136,7 @@ public class GUI implements ViewInterface {
                 PointInterface[] targets = controller.selectAmazonAtPointAndGetMoves(point);
                 updateBoard(targets);
             } catch (Exception e2) {
-                System.out.printf("Click at point %s ignored. It is %s's turn and waiting for shot is %b.%n", point.toString(), playerName, waitingForShot);
+                System.out.printf("Click at point %s ignored.%n", point.toString());
             }
         }
     }
@@ -160,7 +160,6 @@ public class GUI implements ViewInterface {
         turnStatus.setText(playerName + ", it is your turn to move!");
         updateBoard(new PointInterface[]{});
         while(isTurnOngoing);
-        System.out.printf("%s's turn is done.", playerName);
     }
 
     private void updateBoard(PointInterface[] targets) {
@@ -200,7 +199,7 @@ public class GUI implements ViewInterface {
         if(dialogResult == 0) {
             frame.setVisible(false);
             frame.dispose();
-            controller.newGame();
+            controller.newGame(true);
         } else {
             System.exit(0);
         } 
