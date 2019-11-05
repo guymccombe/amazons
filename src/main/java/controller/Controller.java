@@ -30,7 +30,7 @@ public class Controller {
             view.displayATurn(isWhitesTurn);
             isWhitesTurn = !isWhitesTurn;
         }
-        view.displayWinner(true);
+        view.displayWinner(model.isWhiteTheWinner());
     }
 
     public CellStatus[][] getBoard() {
