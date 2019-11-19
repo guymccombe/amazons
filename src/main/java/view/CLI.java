@@ -13,11 +13,10 @@ public class CLI implements ViewInterface {
     private Controller controller;
     private Scanner input = new Scanner(System.in);
 
-    public CLI(Controller controller) {
-        this.controller = controller;
-    }
-
     public void displayATurn(boolean isWhiteTurn) {
+        if (controller == null) {
+            return;
+        }
         String playerName = isWhiteTurn ? "WHITE" : "BLACK";
         System.out.printf("%s: It is your turn to move!%n", playerName);
         displayBoard(new PointInterface[]{});
@@ -135,6 +134,10 @@ public class CLI implements ViewInterface {
         String winnerName = winnerIsWhite ? "WHITE" : "BLACK";
         System.out.printf("Congratulions, %s, you are the winner!%n Press enter to restart.", winnerName);
         input.next();
-        controller.newGame(false);
+        controller.newGame(new CLI());
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 }

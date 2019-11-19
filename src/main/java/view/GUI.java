@@ -40,8 +40,7 @@ public class GUI implements ViewInterface {
     private volatile boolean isTurnOngoing;
     private String playerName;
 
-    public GUI(Controller controller) {
-        this.controller = controller;
+    public GUI() {
         loadSprites();
         initialiseOuter();
        
@@ -155,6 +154,9 @@ public class GUI implements ViewInterface {
     }
 
     public void displayATurn(boolean isWhiteTurn) {
+        if (controller == null) {
+            return;
+        }
         isTurnOngoing = true;
         playerName = isWhiteTurn ? "WHITE" : "BLACK";
         turnStatus.setText(playerName + ", it is your turn to move!");
@@ -199,9 +201,13 @@ public class GUI implements ViewInterface {
         if(dialogResult == 0) {
             frame.setVisible(false);
             frame.dispose();
-            controller.newGame(true);
+            controller.newGame(new GUI());
         } else {
             System.exit(0);
         } 
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 }

@@ -9,6 +9,7 @@ import game.CellStatus;
 import game.InvalidMoveException;
 import game.PointInterface;
 import game.PointOutOfBoundsException;
+import view.AIEnvironment;
 import view.CLI;
 import view.GUI;
 import view.ViewInterface;
@@ -17,9 +18,10 @@ public class Controller {
     private ViewInterface view;
     private BoardInterface model;
 
-    public Controller(boolean useGUI) {
+    public Controller(ViewInterface view) {
         this.model = new Board();
-        this.view = useGUI ? new GUI(this) : new CLI(this);
+        this.view = view;
+        view.setController(this);
 
         startGameLoop();
     }
@@ -51,15 +53,19 @@ public class Controller {
         model.shootAtPoint(point);
     }
 
-    public void newGame(boolean useGUI) {
-        new Controller(useGUI);
+    public void newGame(ViewInterface view) {
+        new Controller(view);
     }
 
     public static void main(String args[]) {
         if (args.length > 0) {
-            new Controller(!Arrays.stream(args).anyMatch("-noGUI"::equals));
+            if (Arrays.stream(args).anyMatch("-env"::equals)) {
+                new Controller(new AIEnvironment());
+            } else if (Arrays.stream(args).anyMatch("-GUI"::equals)) {
+                new Controller(new GUI());
+            }
         } else {
-            new Controller(true);
+            new Controller(new CLI());
         }
     }
 }
