@@ -2,8 +2,11 @@ package view;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
@@ -18,12 +21,20 @@ public class AIEnvironment implements ViewInterface {
     private Controller controller;
 
     public void displayATurn(boolean isWhiteTurn) {
-        System.out.println("turn");
         BufferedImage[] stateImages = generateStateImages(isWhiteTurn);
         try {
             writeStateToFile(stateImages);
         } catch (IOException io) {
             io.printStackTrace();
+        }
+        PointInterface[] movePoints = getMovesFromFile();
+        clearMoveFile();
+        try {
+            controller.selectAmazonAtPointAndGetMoves(movePoints[0]);
+            controller.makeMoveToPointAndGetShots(movePoints[1]);
+            controller.shootAtPoint(movePoints[2]);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -63,7 +74,7 @@ public class AIEnvironment implements ViewInterface {
     }
 
     private void writeStateToFile(BufferedImage[] images) throws IOException {
-        String path = "src\\main\\state\\";
+        String path = "src\\main\\interfaces\\state\\";
         for (int i = 0; i < images.length; i++) {
             File file = new File(path + i + ".gif");
             ImageIO.write(images[i], "gif", file);
@@ -71,10 +82,47 @@ public class AIEnvironment implements ViewInterface {
         }
     }
 
+    private PointInterface[] getMovesFromFile() {
+        String path = "src\\main\\interfaces\\move\\next.MOVE";
+        File file = new File(path);
+        PointInterface[] move = new PointInterface[3];
+        if (file.length() == 0) {
+            return getMovesFromFile();
+        } else {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line = reader.readLine();
+                String[] parts = line.split("-");
+                for (int i = 0; i < parts.length; i++) {
+                    String[] pair = parts[i].split(",");
+                    int x = Integer.parseInt(pair[0]);
+                    int y = Integer.parseInt(pair[1]);
+                    PointInterface point = new Point(x, y);
+                    move[i] = point;
+                }
+                return move;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    private void clearMoveFile() {
+        String path = "src\\main\\interfaces\\state\\";
+        try (PrintWriter pw = new PrintWriter(path)) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void displayWinner(boolean winnerIsWhite) {
-        System.out.println("winner");
         int reward = calculateReward(winnerIsWhite);
-        System.out.println(reward);
+        BufferedImage rewardImage = generateRewardImage(reward, winnerIsWhite);
+        try {
+            writeStateToFile(new BufferedImage[] {rewardImage});
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
     }
 
     private int calculateReward(boolean whiteWinner) {
@@ -107,6 +155,14 @@ public class AIEnvironment implements ViewInterface {
                 }
             }
         }
+    }
+
+    private BufferedImage generateRewardImage(int reward, boolean winnerIsWhite) {
+        BufferedImage img = new BufferedImage(1, reward, BufferedImage.TYPE_BYTE_BINARY);
+        if (winnerIsWhite) {
+            img.setRGB(0, 0, Color.WHITE.getRGB());
+        }
+        return img;
     }
 
     public void setController(Controller controller) {
