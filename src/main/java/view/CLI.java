@@ -19,9 +19,10 @@ public class CLI implements ViewInterface {
         }
         String playerName = isWhiteTurn ? "WHITE" : "BLACK";
         System.out.printf("%s: It is your turn to move!%n", playerName);
-        displayBoard(new PointInterface[]{});
+        displayBoard(new PointInterface[] {});
         PointInterface[] eligibleMoves = selectAmazonAndReturnEligibleMoves();
-        PointInterface[] eligibleShots = moveAmazonOrChangeSelectionAndReturnEligible(eligibleMoves);
+        PointInterface[] eligibleShots =
+                moveAmazonOrChangeSelectionAndReturnEligible(eligibleMoves);
         getShotAndFire(eligibleShots);
     }
 
@@ -40,7 +41,7 @@ public class CLI implements ViewInterface {
                 if (Arrays.stream(eligiblePoints).anyMatch(new Point(j, i)::equals)) {
                     symbol = " ○ ";
                 } else {
-                    switch(board[i][j]) {
+                    switch (board[i][j]) {
                         case BLACK_AMAZON:
                             symbol = " B ";
                             break;
@@ -57,7 +58,7 @@ public class CLI implements ViewInterface {
                 }
                 System.out.print(symbol);
             }
-            System.out.println("");               
+            System.out.println("");
         }
     }
 
@@ -65,7 +66,8 @@ public class CLI implements ViewInterface {
         System.out.println("Enter the coordinate of one of your amazons:");
         PointInterface selectionPoint = readPointFromConsole();
         try {
-            PointInterface[] eligiblePoints = controller.selectAmazonAtPointAndGetMoves(selectionPoint);
+            PointInterface[] eligiblePoints =
+                    controller.selectAmazonAtPointAndGetMoves(selectionPoint);
             return eligiblePoints;
         } catch (Exception e) {
             printException(e);
@@ -91,7 +93,8 @@ public class CLI implements ViewInterface {
         System.out.println(e.getMessage());
     }
 
-    private PointInterface[] moveAmazonOrChangeSelectionAndReturnEligible(PointInterface[] currentlyEligible) {
+    private PointInterface[] moveAmazonOrChangeSelectionAndReturnEligible(
+            PointInterface[] currentlyEligible) {
         displayBoard(currentlyEligible);
         System.out.println("Make a move or select a different amazon:");
 
@@ -130,9 +133,10 @@ public class CLI implements ViewInterface {
     }
 
     public void displayWinner(boolean winnerIsWhite) {
-        displayBoard(new PointInterface[]{});
+        displayBoard(new PointInterface[] {});
         String winnerName = winnerIsWhite ? "WHITE" : "BLACK";
-        System.out.printf("Congratulions, %s, you are the winner!%n Press enter to restart.", winnerName);
+        System.out.printf("Congratulions, %s, you are the winner!%n Press enter to restart.",
+                winnerName);
         input.next();
         controller.newGame(new CLI());
     }

@@ -16,12 +16,11 @@ public class Board implements BoardInterface {
     public Board() {
         cells = new CellInterface[10][10];
 
-        Placement[] defaultPlacement = new Placement[]{
-            new Placement(new Point(3,0), true), new Placement(new Point(6,0), true),
-            new Placement(new Point(0,3), true), new Placement(new Point(9,3), true),
-            new Placement(new Point(3,9), false), new Placement(new Point(6,9), false),
-            new Placement(new Point(0,6), false), new Placement(new Point(9,6), false)
-        };
+        Placement[] defaultPlacement = new Placement[] {new Placement(new Point(3, 0), true),
+                new Placement(new Point(6, 0), true), new Placement(new Point(0, 3), true),
+                new Placement(new Point(9, 3), true), new Placement(new Point(3, 9), false),
+                new Placement(new Point(6, 9), false), new Placement(new Point(0, 6), false),
+                new Placement(new Point(9, 6), false)};
 
         initialiseCells(defaultPlacement);
     }
@@ -85,7 +84,7 @@ public class Board implements BoardInterface {
         isPointWithinBoard &= point.getX() < getMaximumX();
         isPointWithinBoard &= point.getY() > -1;
         isPointWithinBoard &= point.getY() < getMaximumY();
-        return isPointWithinBoard;        
+        return isPointWithinBoard;
     }
 
     private int getMaximumX() {
@@ -98,31 +97,38 @@ public class Board implements BoardInterface {
         return maximum;
     }
 
-    private void setCellStatusAtPoint(PointInterface point, CellStatus status) throws PointOutOfBoundsException {
+    private void setCellStatusAtPoint(PointInterface point, CellStatus status)
+            throws PointOutOfBoundsException {
         if (isPointWithinBoard(point)) {
             cells[point.getY()][point.getX()].setStatus(status);
         } else {
             throw new PointOutOfBoundsException(point);
         }
     }
-    
-    public PointInterface[] selectAmazonAtPointAndReturnMoveTargets(PointInterface point) throws PointOutOfBoundsException, AmazonSelectionException {
+
+    public PointInterface[] selectAmazonAtPointAndReturnMoveTargets(PointInterface point)
+            throws PointOutOfBoundsException, AmazonSelectionException {
         if (nextMove == MoveStatus.WHITE_MOVE || nextMove == MoveStatus.BLACK_MOVE) {
-            if ((nextMove == MoveStatus.WHITE_MOVE && getCellStatusAtPoint(point) == CellStatus.WHITE_AMAZON)
-            ||  (nextMove == MoveStatus.BLACK_MOVE && getCellStatusAtPoint(point) == CellStatus.BLACK_AMAZON)) {
+            if ((nextMove == MoveStatus.WHITE_MOVE
+                    && getCellStatusAtPoint(point) == CellStatus.WHITE_AMAZON)
+                    || (nextMove == MoveStatus.BLACK_MOVE
+                            && getCellStatusAtPoint(point) == CellStatus.BLACK_AMAZON)) {
                 pointOfSelected = point;
                 currentTargets = getValidTargetsAroundSelectedAmazon();
                 return currentTargets;
             } else {
-                throw new AmazonSelectionException("Targeted point is not an Amazon or is the wrong colour.");
+                throw new AmazonSelectionException(
+                        "Targeted point is not an Amazon or is the wrong colour.");
             }
         } else {
-            throw new AmazonSelectionException("You cannot select an Amazon during the shooting stage of a move.");
+            throw new AmazonSelectionException(
+                    "You cannot select an Amazon during the shooting stage of a move.");
         }
 
     }
-    
-    private PointInterface[] getValidTargetsAroundSelectedAmazon() throws AmazonSelectionException, PointOutOfBoundsException {
+
+    private PointInterface[] getValidTargetsAroundSelectedAmazon()
+            throws AmazonSelectionException, PointOutOfBoundsException {
         if (pointOfSelected != null) {
             return getValidTargetsAroundPoint(pointOfSelected);
         } else {
@@ -130,17 +136,18 @@ public class Board implements BoardInterface {
         }
     }
 
-    private PointInterface[] getValidTargetsAroundPoint(PointInterface point) throws PointOutOfBoundsException {
+    private PointInterface[] getValidTargetsAroundPoint(PointInterface point)
+            throws PointOutOfBoundsException {
         ArrayList<PointInterface> outList = new ArrayList<>();
-        outList.addAll(pollInXYDirection( 0,-1, point));
-        outList.addAll(pollInXYDirection( 1,-1, point));
-        outList.addAll(pollInXYDirection( 1, 0, point));
-        outList.addAll(pollInXYDirection( 1, 1, point));
-        outList.addAll(pollInXYDirection( 0, 1, point));
+        outList.addAll(pollInXYDirection(0, -1, point));
+        outList.addAll(pollInXYDirection(1, -1, point));
+        outList.addAll(pollInXYDirection(1, 0, point));
+        outList.addAll(pollInXYDirection(1, 1, point));
+        outList.addAll(pollInXYDirection(0, 1, point));
         outList.addAll(pollInXYDirection(-1, 1, point));
         outList.addAll(pollInXYDirection(-1, 0, point));
-        outList.addAll(pollInXYDirection(-1,-1, point));
-    
+        outList.addAll(pollInXYDirection(-1, -1, point));
+
         int size = outList.size();
         PointInterface[] targets = new PointInterface[size];
         for (int i = 0; i < size; i++) {
@@ -149,7 +156,8 @@ public class Board implements BoardInterface {
         return targets;
     }
 
-    private ArrayList<PointInterface> pollInXYDirection(int xIncrement, int yIncrement, PointInterface point) throws PointOutOfBoundsException {
+    private ArrayList<PointInterface> pollInXYDirection(int xIncrement, int yIncrement,
+            PointInterface point) throws PointOutOfBoundsException {
         int x = point.getX() + xIncrement, y = point.getY() + yIncrement;
         ArrayList<PointInterface> outList = new ArrayList<>();
 
@@ -166,10 +174,13 @@ public class Board implements BoardInterface {
         return outList;
     }
 
-    public PointInterface[] moveSelectedAmazonToPointAndReturnShootTargets(PointInterface point) throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
+    public PointInterface[] moveSelectedAmazonToPointAndReturnShootTargets(PointInterface point)
+            throws AmazonSelectionException, PointOutOfBoundsException, InvalidMoveException {
         if (pointOfSelected != null) {
-            if ((getCellStatusAtPoint(pointOfSelected) == CellStatus.WHITE_AMAZON && nextMove == MoveStatus.WHITE_MOVE)
-            ||  (getCellStatusAtPoint(pointOfSelected) == CellStatus.BLACK_AMAZON && nextMove == MoveStatus.BLACK_MOVE)) {
+            if ((getCellStatusAtPoint(pointOfSelected) == CellStatus.WHITE_AMAZON
+                    && nextMove == MoveStatus.WHITE_MOVE)
+                    || (getCellStatusAtPoint(pointOfSelected) == CellStatus.BLACK_AMAZON
+                            && nextMove == MoveStatus.BLACK_MOVE)) {
                 HashSet<PointInterface> targetsAsSet = new HashSet<>(Arrays.asList(currentTargets));
                 if (targetsAsSet.contains(point)) {
                     setCellStatusAtPoint(point, getCellStatusAtPoint(pointOfSelected));
@@ -187,7 +198,8 @@ public class Board implements BoardInterface {
                     currentTargets = getValidTargetsAroundSelectedAmazon();
                     return currentTargets;
                 } else {
-                    throw new InvalidMoveException("The point: " + point.toString() + " is not a valid target.");
+                    throw new InvalidMoveException(
+                            "The point: " + point.toString() + " is not a valid target.");
                 }
             } else {
                 throw new InvalidMoveException("It is not your turn to move an Amazon.");
@@ -197,20 +209,25 @@ public class Board implements BoardInterface {
         }
     }
 
-    public void shootAtPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
-        if ((getCellStatusAtPoint(pointOfSelected) == CellStatus.WHITE_AMAZON && nextMove == MoveStatus.WHITE_SHOOT)
-         || (getCellStatusAtPoint(pointOfSelected) == CellStatus.BLACK_AMAZON && nextMove == MoveStatus.BLACK_SHOOT)) {
+    public void shootAtPoint(PointInterface point)
+            throws PointOutOfBoundsException, InvalidMoveException {
+        if ((getCellStatusAtPoint(pointOfSelected) == CellStatus.WHITE_AMAZON
+                && nextMove == MoveStatus.WHITE_SHOOT)
+                || (getCellStatusAtPoint(pointOfSelected) == CellStatus.BLACK_AMAZON
+                        && nextMove == MoveStatus.BLACK_SHOOT)) {
             HashSet<PointInterface> targetsAsSet = new HashSet<>(Arrays.asList(currentTargets));
             if (targetsAsSet.contains(point)) {
                 setCellStatusAtPoint(point, CellStatus.ARROW);
                 pointOfSelected = null;
                 currentTargets = null;
-                nextMove = (nextMove == MoveStatus.WHITE_SHOOT) ? MoveStatus.BLACK_MOVE : MoveStatus.WHITE_MOVE;
+                nextMove = (nextMove == MoveStatus.WHITE_SHOOT) ? MoveStatus.BLACK_MOVE
+                        : MoveStatus.WHITE_MOVE;
             } else {
-                throw new InvalidMoveException("The point: " + point.toString() + " is not a valid target.");
+                throw new InvalidMoveException(
+                        "The point: " + point.toString() + " is not a valid target.");
             }
         } else {
-            throw new InvalidMoveException("It is not your turn to shoot.");        
+            throw new InvalidMoveException("It is not your turn to shoot.");
         }
 
     }
@@ -240,7 +257,8 @@ public class Board implements BoardInterface {
                 return gameOver;
             }
         } catch (PointOutOfBoundsException pointOutOfBoundsException) {
-            System.err.println(pointOutOfBoundsException.getMessage() + "\n This should never occur! Check the storage of amazons.");
+            System.err.println(pointOutOfBoundsException.getMessage()
+                    + "\n This should never occur! Check the storage of amazons.");
             return true;
         }
     }

@@ -49,7 +49,8 @@ public class Controller {
         return model.moveSelectedAmazonToPointAndReturnShootTargets(point);
     }
 
-    public void shootAtPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
+    public void shootAtPoint(PointInterface point)
+            throws PointOutOfBoundsException, InvalidMoveException {
         model.shootAtPoint(point);
     }
 

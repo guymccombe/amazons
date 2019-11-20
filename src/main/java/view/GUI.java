@@ -43,11 +43,11 @@ public class GUI implements ViewInterface {
     public GUI() {
         loadSprites();
         initialiseOuter();
-       
+
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setIconImage(pieceSprites[2]);
         frame.setTitle("Amazons by Guy McCombe");
-        frame.setSize(750,750);
+        frame.setSize(750, 750);
         frame.add(outer);
         frame.setVisible(true);
 
@@ -70,23 +70,22 @@ public class GUI implements ViewInterface {
 
         boardPanel.add(new JLabel(""));
         for (int j = 0; j < boardCells[0].length; j++) {
-            JLabel label = new JLabel(j+"");
+            JLabel label = new JLabel(j + "");
             label.setVerticalAlignment(JLabel.CENTER);
             label.setHorizontalAlignment(JLabel.CENTER);
             boardPanel.add(label);
         }
 
         for (int i = 0; i < boardCells.length; i++) {
-            JLabel label = new JLabel(i+"");
+            JLabel label = new JLabel(i + "");
             label.setVerticalAlignment(JLabel.CENTER);
             label.setHorizontalAlignment(JLabel.CENTER);
             boardPanel.add(label);
 
             for (int j = 0; j < boardCells[0].length; j++) {
                 JButton button = new JButton();
-                button.setIcon(new ImageIcon(
-                    new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)
-                ));
+                button.setIcon(
+                        new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
                 button.setBackground(Color.WHITE);
                 button.setActionCommand(j + "," + i);
                 button.addActionListener(new ActionListener() {
@@ -94,8 +93,7 @@ public class GUI implements ViewInterface {
                     public void actionPerformed(ActionEvent evt) {
                         String actionCommand = evt.getActionCommand();
                         int[] splitToInts = Arrays.stream(actionCommand.split(","))
-                                .mapToInt(Integer::parseInt)
-                                .toArray();
+                                .mapToInt(Integer::parseInt).toArray();
                         buttonPressedAtPoint(new Point(splitToInts[0], splitToInts[1]));
                     }
                 });
@@ -116,7 +114,7 @@ public class GUI implements ViewInterface {
     private void fireShotAtPoint(PointInterface point) {
         try {
             controller.shootAtPoint(point);
-            updateBoard(new PointInterface[]{});
+            updateBoard(new PointInterface[] {});
             waitingForShot = false;
             isTurnOngoing = false;
         } catch (Exception e) {
@@ -129,7 +127,7 @@ public class GUI implements ViewInterface {
             PointInterface[] targets = controller.makeMoveToPointAndGetShots(point);
             waitingForShot = true;
             turnStatus.setText(playerName + ", shoot an arrow.");
-            updateBoard(targets);            
+            updateBoard(targets);
         } catch (Exception e) {
             try {
                 PointInterface[] targets = controller.selectAmazonAtPointAndGetMoves(point);
@@ -145,7 +143,7 @@ public class GUI implements ViewInterface {
             URL url = getClass().getResource("sprites.png");
             BufferedImage image = ImageIO.read(new File(url.getPath()));
             for (int i = 0; i < pieceSprites.length; i++) {
-                pieceSprites[i] = image.getSubimage(0, i*64, 64, 64);
+                pieceSprites[i] = image.getSubimage(0, i * 64, 64, 64);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,8 +158,8 @@ public class GUI implements ViewInterface {
         isTurnOngoing = true;
         playerName = isWhiteTurn ? "WHITE" : "BLACK";
         turnStatus.setText(playerName + ", it is your turn to move!");
-        updateBoard(new PointInterface[]{});
-        while(isTurnOngoing);
+        updateBoard(new PointInterface[] {});
+        while (isTurnOngoing);
     }
 
     private void updateBoard(PointInterface[] targets) {
@@ -183,8 +181,7 @@ public class GUI implements ViewInterface {
                             break;
                         case EMPTY:
                             boardCells[i][j].setIcon(new ImageIcon(
-                                new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)
-                            ));
+                                    new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
                             break;
                     }
                 }
@@ -198,13 +195,13 @@ public class GUI implements ViewInterface {
         String message = "Congratulations! " + winner + ", you win!\nPlay again?";
         String title = winner + " wins!";
         int dialogResult = JOptionPane.showConfirmDialog(frame, message, title, dialogButton);
-        if(dialogResult == 0) {
+        if (dialogResult == 0) {
             frame.setVisible(false);
             frame.dispose();
             controller.newGame(new GUI());
         } else {
             System.exit(0);
-        } 
+        }
     }
 
     public void setController(Controller controller) {

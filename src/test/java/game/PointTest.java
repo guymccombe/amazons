@@ -25,15 +25,15 @@ public class PointTest {
 
     @Test
     public void twoPointsWithSameCoordAreEqual() {
-        PointInterface pointOne = new Point(1,1);
-        PointInterface pointTwo = new Point(1,1);
+        PointInterface pointOne = new Point(1, 1);
+        PointInterface pointTwo = new Point(1, 1);
         assertTrue(pointOne.equals(pointTwo));
     }
 
     @Test
     public void twoPointsWithSameCoordHaveTheSameHashCode() {
-        PointInterface pointOne = new Point(1,1);
-        PointInterface pointTwo = new Point(1,1);
+        PointInterface pointOne = new Point(1, 1);
+        PointInterface pointTwo = new Point(1, 1);
         assertTrue(pointOne.hashCode() == pointTwo.hashCode());
     }
 }

@@ -18,6 +18,7 @@ public class AIEnvironment implements ViewInterface {
     private Controller controller;
 
     public void displayATurn(boolean isWhiteTurn) {
+        System.out.println("turn");
         BufferedImage[] stateImages = generateStateImages(isWhiteTurn);
         try {
             writeStateToFile(stateImages);
@@ -71,36 +72,37 @@ public class AIEnvironment implements ViewInterface {
     }
 
     public void displayWinner(boolean winnerIsWhite) {
+        System.out.println("winner");
         int reward = calculateReward(winnerIsWhite);
         System.out.println(reward);
     }
 
-    int calculateReward(boolean whiteWinner) {
+    private int calculateReward(boolean whiteWinner) {
         CellStatus winningAmazon = whiteWinner ? CellStatus.WHITE_AMAZON : CellStatus.BLACK_AMAZON;
         CellStatus[][] board = controller.getBoard();
         ArrayList<PointInterface> listOfAvailableCells = new ArrayList<>();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 if (board[x][y] == winningAmazon) {
-                    for (int xSearch = -1; xSearch < 2; xSearch ++) {
+                    for (int xSearch = -1; xSearch < 2; xSearch++) {
                         for (int ySearch = -1; ySearch < 2; ySearch++) {
                             addEmptyNeighbours(board, xSearch, ySearch, listOfAvailableCells);
                         }
-                    } 
+                    }
                 }
             }
         }
         return listOfAvailableCells.size();
     }
 
-    private void addEmptyNeighbours(
-        CellStatus[][] board, int x, int y, ArrayList<PointInterface> listOfAvailableCells) {
-        if (board[x][y] != CellStatus.EMPTY || listOfAvailableCells.contains(new Point(x,y))) {
+    private void addEmptyNeighbours(CellStatus[][] board, int x, int y,
+            ArrayList<PointInterface> listOfAvailableCells) {
+        if (board[x][y] != CellStatus.EMPTY || listOfAvailableCells.contains(new Point(x, y))) {
             return;
         } else {
-            listOfAvailableCells.add(new Point(x,y));
-            for (int xSearch = -1; xSearch < 2; xSearch ++) {
-                for (int ySearch = -1; ySearch < 2; ySearch ++) {
+            listOfAvailableCells.add(new Point(x, y));
+            for (int xSearch = -1; xSearch < 2; xSearch++) {
+                for (int ySearch = -1; ySearch < 2; ySearch++) {
                     addEmptyNeighbours(board, xSearch, ySearch, listOfAvailableCells);
                 }
             }
@@ -110,5 +112,5 @@ public class AIEnvironment implements ViewInterface {
     public void setController(Controller controller) {
         this.controller = controller;
     }
-    
+
 }
