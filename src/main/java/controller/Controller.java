@@ -28,10 +28,10 @@ public class Controller {
 
     private void startGameLoop() {
         boolean isWhitesTurn = true;
-        while (model.isWhiteTheWinner() == null) {
-            view.displayATurn(isWhitesTurn);
-            isWhitesTurn = !isWhitesTurn;
-        }
+        // while (model.isWhiteTheWinner() == null) {
+        view.displayATurn(isWhitesTurn);
+        isWhitesTurn = !isWhitesTurn;
+        // }
         view.displayWinner(model.isWhiteTheWinner());
     }
 

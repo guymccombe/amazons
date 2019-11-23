@@ -39,6 +39,9 @@ public class AIEnvironment implements ViewInterface {
     }
 
     private BufferedImage[] generateStateImages(boolean isWhiteTurn) {
+        if (new File("src\\main\\interfaces\\state\\0.png").length() != 0) {
+            return generateStateImages(isWhiteTurn);
+        }
         BufferedImage[] images = new BufferedImage[3];
         for (int i = 0; i < images.length; i++) {
             images[i] = new BufferedImage(10, 10, BufferedImage.TYPE_BYTE_BINARY);
@@ -76,8 +79,8 @@ public class AIEnvironment implements ViewInterface {
     private void writeStateToFile(BufferedImage[] images) throws IOException {
         String path = "src\\main\\interfaces\\state\\";
         for (int i = 0; i < images.length; i++) {
-            File file = new File(path + i + ".gif");
-            ImageIO.write(images[i], "gif", file);
+            File file = new File(path + i + ".png");
+            ImageIO.write(images[i], "png", file);
             System.out.printf("Wrote image %d to path: %s", i, file.getAbsolutePath());
         }
     }
@@ -90,12 +93,11 @@ public class AIEnvironment implements ViewInterface {
             return getMovesFromFile();
         } else {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line = reader.readLine();
-                String[] parts = line.split("-");
-                for (int i = 0; i < parts.length; i++) {
-                    String[] pair = parts[i].split(",");
-                    int x = Integer.parseInt(pair[0]);
-                    int y = Integer.parseInt(pair[1]);
+                for (int i = 0; i < move.length; i++) {
+                    String line = reader.readLine();
+                    String[] lineArr = line.split("\\s+");
+                    int x = Integer.parseInt(lineArr[0]);
+                    int y = Integer.parseInt(lineArr[1]);
                     PointInterface point = new Point(x, y);
                     move[i] = point;
                 }
