@@ -28,10 +28,10 @@ public class Controller {
 
     private void startGameLoop() {
         boolean isWhitesTurn = true;
-        // while (model.isWhiteTheWinner() == null) {
-        view.displayATurn(isWhitesTurn);
-        isWhitesTurn = !isWhitesTurn;
-        // }
+        while (model.isWhiteTheWinner() == null) {
+            view.displayATurn(isWhitesTurn);
+            isWhitesTurn = !isWhitesTurn;
+        }
         view.displayWinner(model.isWhiteTheWinner());
     }
 
@@ -49,8 +49,7 @@ public class Controller {
         return model.moveSelectedAmazonToPointAndReturnShootTargets(point);
     }
 
-    public void shootAtPoint(PointInterface point)
-            throws PointOutOfBoundsException, InvalidMoveException {
+    public void shootAtPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
         model.shootAtPoint(point);
     }
 
