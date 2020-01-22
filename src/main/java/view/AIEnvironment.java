@@ -20,8 +20,10 @@ public class AIEnvironment implements ViewInterface {
     private Controller controller;
 
     public void displayATurn(boolean isWhiteTurn) {
+        System.out.println("Turn request received.");
         try {
             BufferedImage[] stateImages = generateStateImages(isWhiteTurn);
+            System.out.println("State images generated.");
             writeStateToFile(stateImages);
         } catch (IOException io) {
             io.printStackTrace();
@@ -38,10 +40,6 @@ public class AIEnvironment implements ViewInterface {
     }
 
     private BufferedImage[] generateStateImages(boolean isWhiteTurn) throws IOException {
-        File state0 = new File("src\\main\\interfaces\\state\\0.png");
-        state0.createNewFile();
-        while (state0.length() == 0)
-            ;
         BufferedImage[] images = new BufferedImage[3];
         for (int i = 0; i < images.length; i++) {
             images[i] = new BufferedImage(10, 10, BufferedImage.TYPE_BYTE_BINARY);
@@ -51,25 +49,25 @@ public class AIEnvironment implements ViewInterface {
         for (int x = 0; x < cells.length; x++) {
             for (int y = 0; y < cells[x].length; y++) {
                 switch (cells[x][y]) {
-                case EMPTY:
-                    break;
-                case BLACK_AMAZON:
-                    if (isWhiteTurn) {
-                        images[1].setRGB(x, y, Color.WHITE.getRGB());
-                    } else {
-                        images[0].setRGB(x, y, Color.WHITE.getRGB());
-                    }
-                    break;
-                case WHITE_AMAZON:
-                    if (isWhiteTurn) {
-                        images[0].setRGB(x, y, Color.WHITE.getRGB());
-                    } else {
-                        images[1].setRGB(x, y, Color.WHITE.getRGB());
-                    }
-                    break;
-                case ARROW:
-                    images[2].setRGB(x, y, Color.WHITE.getRGB());
-                    break;
+                    case EMPTY:
+                        break;
+                    case BLACK_AMAZON:
+                        if (isWhiteTurn) {
+                            images[1].setRGB(x, y, Color.WHITE.getRGB());
+                        } else {
+                            images[0].setRGB(x, y, Color.WHITE.getRGB());
+                        }
+                        break;
+                    case WHITE_AMAZON:
+                        if (isWhiteTurn) {
+                            images[0].setRGB(x, y, Color.WHITE.getRGB());
+                        } else {
+                            images[1].setRGB(x, y, Color.WHITE.getRGB());
+                        }
+                        break;
+                    case ARROW:
+                        images[2].setRGB(x, y, Color.WHITE.getRGB());
+                        break;
                 }
             }
         }
@@ -89,8 +87,7 @@ public class AIEnvironment implements ViewInterface {
         String path = "src\\main\\interfaces\\move\\next.MOVE";
         File file = new File(path);
         PointInterface[] move = new PointInterface[3];
-        while (file.length() == 0)
-            ;
+        while (file.length() == 0);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             for (int i = 0; i < move.length; i++) {
                 String line = reader.readLine();
@@ -108,7 +105,7 @@ public class AIEnvironment implements ViewInterface {
     }
 
     private void clearMoveFile() {
-        String path = "src\\main\\interfaces\\state\\";
+        String path = "src\\main\\interfaces\\move\\next.MOVE";
         try (PrintWriter pw = new PrintWriter(path)) {
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +116,7 @@ public class AIEnvironment implements ViewInterface {
         int reward = calculateReward(winnerIsWhite);
         BufferedImage rewardImage = generateRewardImage(reward, winnerIsWhite);
         try {
-            writeStateToFile(new BufferedImage[] { rewardImage });
+            writeStateToFile(new BufferedImage[] {rewardImage});
         } catch (IOException io) {
             io.printStackTrace();
         }

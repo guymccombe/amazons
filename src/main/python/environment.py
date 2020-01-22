@@ -1,13 +1,14 @@
 from subprocess import Popen
 from cv2 import imread, IMREAD_UNCHANGED
 from os import stat
-from os.path import join, dirname
+from os.path import join, dirname, exists
 
 
 class Environment():
 
     def __init__(self):
-        self.pathToImages = join(dirname(__file__), "/interfaces/")
+        self.pathToImages = join(dirname(__file__), "..", "interfaces\\")
+        self.__clearState()
         process = Popen("java -cp target/classes controller.Controller -env")
 
     def move(self, fromXY, toXY, shotXY):
@@ -19,11 +20,9 @@ class Environment():
             moveFile.write("\n".join("%s %s" % coord for coord in move))
 
     def isGameFinished(self):
-        ''' Returns whether whether the game is over, 
-        after the previous move has finished processing.'''
-        while stat(self.pathToImages + "state/0.png").st_size() == 0:
-            pass    # Wait for previous move to be processed
-        img = imread(self.pathToImages + 'state/0.png')
+        img = None
+        while img is None:
+            img = imread(self.pathToImages + "state/0.png")
         return img.shape[1] == 1
 
     def getReward(self):
@@ -42,14 +41,21 @@ class Environment():
         return rewards
 
     def __clearState(self):
+        print("Clearing state..")
+        print(f" -- Before: {stat(self.pathToImages + 'state/0.png').st_size}")
         open(self.pathToImages + "state/0.png", "w").close()
         open(self.pathToImages + "state/1.png", "w").close()
         open(self.pathToImages + "state/2.png", "w").close()
+        print(f" -- After: {stat(self.pathToImages + 'state/0.png').st_size}")
 
     def getState(self):
         ''' Returns a tuple of state images '''
+        print("Getting state")
         ownAmazons = imread(self.pathToImages +
                             'state/0.png', IMREAD_UNCHANGED)
+
+        print(ownAmazons)
+
         if ownAmazons.shape[1] == 1:  # Check game is not complete
             return -1
 

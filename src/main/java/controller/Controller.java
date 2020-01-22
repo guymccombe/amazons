@@ -23,12 +23,15 @@ public class Controller {
         this.view = view;
         view.setController(this);
 
+        System.out.println("Starting Java gameloop...");
+
         startGameLoop();
     }
 
     private void startGameLoop() {
         boolean isWhitesTurn = true;
         while (model.isWhiteTheWinner() == null) {
+            System.out.println("Next turn.");
             view.displayATurn(isWhitesTurn);
             isWhitesTurn = !isWhitesTurn;
         }
@@ -49,7 +52,8 @@ public class Controller {
         return model.moveSelectedAmazonToPointAndReturnShootTargets(point);
     }
 
-    public void shootAtPoint(PointInterface point) throws PointOutOfBoundsException, InvalidMoveException {
+    public void shootAtPoint(PointInterface point)
+            throws PointOutOfBoundsException, InvalidMoveException {
         model.shootAtPoint(point);
     }
 
