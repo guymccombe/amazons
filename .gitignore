@@ -2,3 +2,4 @@
 .settings
 target
 src/main/interfaces
+__pycache__

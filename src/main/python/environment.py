@@ -41,27 +41,23 @@ class Environment():
         return rewards
 
     def __clearState(self):
-        print("Clearing state..")
-        print(f" -- Before: {stat(self.pathToImages + 'state/0.png').st_size}")
         open(self.pathToImages + "state/0.png", "w").close()
         open(self.pathToImages + "state/1.png", "w").close()
         open(self.pathToImages + "state/2.png", "w").close()
-        print(f" -- After: {stat(self.pathToImages + 'state/0.png').st_size}")
 
     def getState(self):
         ''' Returns a tuple of state images '''
-        print("Getting state")
         ownAmazons = imread(self.pathToImages +
                             'state/0.png', IMREAD_UNCHANGED)
-
-        print(ownAmazons)
-
         if ownAmazons.shape[1] == 1:  # Check game is not complete
             return -1
 
-        oppAmazons = imread(self.pathToImages +
-                            'state/1.png', IMREAD_UNCHANGED)
-        arrows = imread(self.pathToImages + 'state/2.png', IMREAD_UNCHANGED)
+        oppAmazons, arrows = None, None
+        while oppAmazons is None or arrows is None:
+            oppAmazons = imread(self.pathToImages +
+                                'state/1.png', IMREAD_UNCHANGED)
+            arrows = imread(self.pathToImages +
+                            'state/2.png', IMREAD_UNCHANGED)
 
         self.__clearState()
         return ownAmazons, oppAmazons, arrows
