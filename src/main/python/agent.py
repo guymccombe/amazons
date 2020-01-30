@@ -37,16 +37,25 @@ class Agent():
 
             visualisation = torch.zeros([3, 10, 10], dtype=torch.uint8)
             maxes = []
-
-            # TODO selection from policy by weighted random
             for i in range(3):
                 argmax = torch.argmax(prediction[i]).item()
                 maxes.append((argmax // 10, argmax % 10))
                 visualisation[i][maxes[i][0]][maxes[i][1]] = 255
+
             self.visdom.image(visualisation, win="Next move")
+
             fromXY, toXY, shootAt = maxes
 
-            # TODO loss function for teaching valid moves
+            if self.env.isLegalMove(shootAt, fromXY, toXY):
+                self.env.move(shootAt, fromXY, toXY)
+                loss = prediction - prediction
+                loss.sum().backward()
+            else:
+                # Remove move from potential moves
+                loss = prediction - float("1")
+                loss.sum().backward()
+
+            optimiser.step()
 
             self.net.save()
 

@@ -2,17 +2,31 @@ from subprocess import Popen
 from cv2 import imread, IMREAD_UNCHANGED
 from os import stat
 from os.path import join, dirname, exists
+import time
 
 
 class Environment():
 
     def __init__(self):
+        self.currentState = None
         self.pathToImages = join(dirname(__file__), "..", "interfaces\\")
         self.__clearState()
         process = Popen("java -cp target/classes controller.Controller -env")
 
+    def isLegalMove(self, fromXY, toXY, shotXY):
+        ''' Returns whether move can be made '''
+        if self.currentState == None:
+            raise RuntimeError("A move was checked at an illegal time.")
+        else:
+            if self.currentState[0][fromXY] == 0:
+                return False
+            else:
+                return True
+                # TODO more cases
+
     def move(self, fromXY, toXY, shotXY):
         ''' Sends specified move to environment. '''
+        self.__clearState()
         self.__writeMove((fromXY, toXY, shotXY))
 
     def __writeMove(self, move):
@@ -36,8 +50,6 @@ class Environment():
             rewards = rewardMagnitude, -rewardMagnitude
         else:
             rewards = -rewardMagnitude, rewardMagnitude
-
-        self.__clearState()
         return rewards
 
     def __clearState(self):
@@ -59,8 +71,8 @@ class Environment():
             arrows = imread(self.pathToImages +
                             'state/2.png', IMREAD_UNCHANGED)
 
-        self.__clearState()
-        return ownAmazons, oppAmazons, arrows
+        self.currentState = ownAmazons, oppAmazons, arrows
+        return self.currentState
 
 
 if __name__ == "__main__":
