@@ -11,7 +11,8 @@ class Environment():
         self.currentState = None
         self.pathToImages = join(dirname(__file__), "..", "interfaces\\")
         self.__clearState()
-        process = Popen("java -cp target/classes controller.Controller -env")
+        self.process = Popen(
+            "java -cp target/classes controller.Controller -env")
 
     def isLegalMove(self, fromXY, toXY, shotXY):
         ''' Returns whether move can be made '''
@@ -73,6 +74,9 @@ class Environment():
 
         self.currentState = ownAmazons, oppAmazons, arrows
         return self.currentState
+
+    def kill(self):
+        self.process.terminate()
 
 
 if __name__ == "__main__":

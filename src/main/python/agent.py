@@ -12,6 +12,7 @@ import visdom
 
 
 class Agent():
+    EPISODES = 100
 
     def __init__(self):
         self.visdom = visdom.Visdom(port=8097)
@@ -23,13 +24,20 @@ class Agent():
         self.train()
 
     def train(self):
-        optimiser = torch.optim.Adam(self.net.parameters(), lr=0.001)
+        optimiser = torch.optim.Adam(self.net.parameters(), lr=0.01)
 
-        while not self.env.isGameFinished():
+        episode = 0
+        while episode < self.EPISODES:
+            # while not self.env.isGameFinished():
+            self.env.isGameFinished()
             state = self.env.getState()
             tensor = torch.tensor(state, dtype=torch.float,
                                   device=self.device) / 255
-            self.visdom.image(tensor, win="State")
+
+            # Scale visualisation by 10
+            visualisation = tensor.numpy().repeat(10, axis=1).repeat(10, axis=2)
+            self.visdom.image(visualisation, win="State")
+
             tensor.unsqueeze_(0)
 
             optimiser.zero_grad()
@@ -42,22 +50,36 @@ class Agent():
                 maxes.append((argmax // 10, argmax % 10))
                 visualisation[i][maxes[i][0]][maxes[i][1]] = 255
 
+                # Scale visualisation by 10
+            visualisation = visualisation.numpy().repeat(10, axis=1).repeat(10, axis=2)
             self.visdom.image(visualisation, win="Next move")
 
             fromXY, toXY, shootAt = maxes
 
-            if self.env.isLegalMove(shootAt, fromXY, toXY):
-                self.env.move(shootAt, fromXY, toXY)
-                loss = prediction - prediction
-                loss.sum().backward()
-            else:
-                # Remove move from potential moves
-                loss = prediction - float("1")
-                loss.sum().backward()
+            target = torch.zeros_like(prediction)
+            target[0] = torch.tensor(self.env.currentState[0]/255/4)
+            loss = F.kl_div(prediction, target)
 
+            visualisation = prediction.detach().numpy().repeat(10, axis=1).repeat(10, axis=2)
+            self.visdom.image(visualisation, win="Prediction")
+
+            '''
+                if self.env.isLegalMove(fromXY, toXY, shootAt):
+                    self.env.move(fromXY, toXY, shootAt)
+                    loss = prediction - prediction
+                    loss.backward()
+                else:
+                    # Remove move from potential moves
+                    loss = prediction - float("1")
+                    loss.backward()
+            '''
+
+            loss.backward()
             optimiser.step()
 
             self.net.save()
+        self.env.kill()
+        print("Fin.")
 
     def eval(self):
         print("TODO")
