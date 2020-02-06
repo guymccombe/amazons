@@ -12,78 +12,82 @@ import visdom
 
 
 class Agent():
-    EPISODES = 100
+    EPISODES = 40
 
-    def __init__(self):
+    def __init__(self, modelByRecent=False, modelByName=""):
         self.visdom = visdom.Visdom(port=8097)
         self.env = Environment()
         self.device = torch.device(
             "cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         self.net = NeuralNet().to(self.device)
-        self.train()
+        if modelByRecent:
+            self.net.loadMostRecent()
+        if modelByName != "":
+            self.net.load(modelByName)
+
+        self.env.isGameFinished()
+        self.env.getState()
+        print(self.env.getValidMoves())
+
+        # self.train()
 
     def train(self):
-        optimiser = torch.optim.Adam(self.net.parameters(), lr=0.01)
+        optimiser = torch.optim.Adam(self.net.parameters(), lr=0.001)
+        modelName = time.time()
 
         episode = 0
         while episode < self.EPISODES:
-            # while not self.env.isGameFinished():
             self.env.isGameFinished()
             state = self.env.getState()
             tensor = torch.tensor(state, dtype=torch.float,
                                   device=self.device) / 255
 
-            # Scale visualisation by 10
-            visualisation = tensor.numpy().repeat(10, axis=1).repeat(10, axis=2)
-            self.visdom.image(visualisation, win="State")
+            self.visdom.image(
+                self.__resizeTensorForDisplay(tensor), win="State")
 
             tensor.unsqueeze_(0)
 
             optimiser.zero_grad()
-            prediction = self.net(tensor).view(3, 10, 10)
+            policy, value = self.net(tensor)
 
+            policy = policy.view(3, 10, 10)
             visualisation = torch.zeros([3, 10, 10], dtype=torch.uint8)
             maxes = []
             for i in range(3):
-                argmax = torch.argmax(prediction[i]).item()
+                argmax = torch.argmax(policy[i]).item()
                 maxes.append((argmax // 10, argmax % 10))
                 visualisation[i][maxes[i][0]][maxes[i][1]] = 255
 
-                # Scale visualisation by 10
-            visualisation = visualisation.numpy().repeat(10, axis=1).repeat(10, axis=2)
-            self.visdom.image(visualisation, win="Next move")
+            self.visdom.image(self.__resizeTensorForDisplay(
+                visualisation), win="Next move")
+            #self.visdom.image(self.__resizeTensorForDisplay(value), win="Value")
 
             fromXY, toXY, shootAt = maxes
 
-            target = torch.zeros_like(prediction)
+            target = torch.zeros_like(policy)
             target[0] = torch.tensor(self.env.currentState[0]/255/4)
-            loss = F.kl_div(prediction, target)
-
-            visualisation = prediction.detach().numpy().repeat(10, axis=1).repeat(10, axis=2)
-            self.visdom.image(visualisation, win="Prediction")
-
-            '''
-                if self.env.isLegalMove(fromXY, toXY, shootAt):
-                    self.env.move(fromXY, toXY, shootAt)
-                    loss = prediction - prediction
-                    loss.backward()
-                else:
-                    # Remove move from potential moves
-                    loss = prediction - float("1")
-                    loss.backward()
-            '''
-
+            loss = F.kl_div(policy, target)
             loss.backward()
             optimiser.step()
 
-            self.net.save()
+            self.env.move(fromXY, toXY, shootAt)
+
+            print(f"Episode {episode} finished.")
+            episode += 1
+            self.net.save(modelName)
+
         self.env.kill()
         print("Fin.")
+
+    def __resizeTensorForDisplay(self, tensor):
+        print(tensor.size())
+        return tensor.detach().cpu().numpy().repeat(
+            30, axis=1).repeat(30, axis=2)
 
     def eval(self):
         print("TODO")
 
 
 if __name__ == "__main__":
-    Agent()
+    Agent(modelByRecent=False)
