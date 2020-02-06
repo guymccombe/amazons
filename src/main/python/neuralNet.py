@@ -8,16 +8,16 @@ from os.path import join, dirname, exists, getctime
 class NeuralNet(nn.Module):
     NUMBER_OF_RESIDUAL_LAYERS = 40
 
-    def __init__(self):
+    def __init__(self, in_channels=3):
         super(NeuralNet, self).__init__()
-        self.inputLayer = self.__inputLayer()
+        self.inputLayer = self.__inputLayer(in_channels)
         self.residualBlock = self.__residualBlock()
         self.policyHead = self.__policyHead()
         self.valueHead = self.__valueHead()
 
-    def __inputLayer(self):
+    def __inputLayer(self, in_channels):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=3, out_channels=500,
+        layers.append(nn.Conv2d(in_channels, out_channels=500,
                                 kernel_size=3, padding=1, bias=False))
         layers.append(nn.BatchNorm2d(500))
         layers.append(nn.ReLU())
@@ -37,10 +37,10 @@ class NeuralNet(nn.Module):
     def __policyHead(self):
         layers = nn.ModuleList()
         layers.append(nn.Conv2d(in_channels=500, out_channels=1,
-                                kernel_size=1, padding=1, bias=False))
+                                kernel_size=1, padding=0, bias=False))
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
-        layers.append(nn.Linear(12, 25))
+        layers.append(nn.Linear(10, 10))
         return layers
 
     def __valueHead(self):
@@ -69,12 +69,15 @@ class NeuralNet(nn.Module):
         policy = networkInput
         value = networkInput
         for layer in self.policyHead:
+            print(policy.size())
             policy = layer(policy)
+
+        print(policy.size())
 
         for layer in self.valueHead:
             value = layer(value)
 
-        return policy, value
+        return policy.view(10, 10), value
 
     def save(self, name):
         path = join(dirname(__file__), f"models\\{name}.pth")
