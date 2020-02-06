@@ -3,6 +3,7 @@ from cv2 import imread, IMREAD_UNCHANGED
 from os import stat
 from os.path import join, dirname, exists
 import time
+import numpy as np
 
 
 class Environment():
@@ -14,20 +15,17 @@ class Environment():
         self.process = Popen(
             "java -cp target/classes controller.Controller -env")
 
-    def isLegalMove(self, fromXY, toXY, shotXY):
-        ''' Returns whether move can be made '''
+    def getValidMoves(self):
         if self.currentState == None:
-            raise RuntimeError("A move was checked at an illegal time.")
+            raise Exception("Function called before retrieving game state.")
         else:
-            if self.currentState[0][fromXY] == 0:
-                return False
-            else:
-                return True
-                # TODO more cases
+            validMoves = np.zeros_like(self.currentState)
+            validMoves[0] = self.currentState[0] // 255
+
+            return validMoves
 
     def move(self, fromXY, toXY, shotXY):
         ''' Sends specified move to environment. '''
-        self.__clearState()
         self.__writeMove((fromXY, toXY, shotXY))
 
     def __writeMove(self, move):
