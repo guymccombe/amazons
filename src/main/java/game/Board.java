@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Board implements BoardInterface {
+public class Board implements BoardInterface, Cloneable {
     private CellInterface[][] cells;
     private PointInterface[] currentTargets;
     private PointInterface pointOfSelected;
@@ -117,8 +117,9 @@ public class Board implements BoardInterface {
                 currentTargets = getValidTargetsAroundSelectedAmazon();
                 return currentTargets;
             } else {
-                throw new AmazonSelectionException(
-                        "Targeted point is not an Amazon or is the wrong colour.");
+                throw new AmazonSelectionException("Targeted point " + point.toString()
+                        + " is not an Amazon or is the wrong colour. It is: "
+                        + getCellStatusAtPoint(point));
             }
         } else {
             throw new AmazonSelectionException(
@@ -269,5 +270,10 @@ public class Board implements BoardInterface {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

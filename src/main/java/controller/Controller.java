@@ -17,6 +17,7 @@ import view.ViewInterface;
 public class Controller {
     private ViewInterface view;
     private BoardInterface model;
+    private BoardInterface modelAtLastCompletedMove;
 
     public Controller(ViewInterface view) {
         this.model = new Board();
@@ -29,13 +30,19 @@ public class Controller {
     }
 
     private void startGameLoop() {
-        boolean isWhitesTurn = true;
-        while (model.isWhiteTheWinner() == null) {
-            System.out.println("Next turn.");
-            view.displayATurn(isWhitesTurn);
-            isWhitesTurn = !isWhitesTurn;
+        try {
+            boolean isWhitesTurn = true;
+            while (model.isWhiteTheWinner() == null) {
+                modelAtLastCompletedMove = (BoardInterface) model.clone();
+                view.displayATurn(isWhitesTurn);
+                isWhitesTurn = !isWhitesTurn;
+            }
+            view.displayWinner(model.isWhiteTheWinner());
+
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
         }
-        view.displayWinner(model.isWhiteTheWinner());
+
     }
 
     public CellStatus[][] getBoard() {
@@ -59,6 +66,14 @@ public class Controller {
 
     public void newGame(ViewInterface view) {
         new Controller(view);
+    }
+
+    public void rollback() {
+        try {
+            model = (BoardInterface) modelAtLastCompletedMove.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String args[]) {

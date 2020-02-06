@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import controller.Controller;
+import game.AmazonSelectionException;
 import game.CellStatus;
+import game.InvalidMoveException;
 import game.Point;
 import game.PointInterface;
 
@@ -21,21 +23,17 @@ public class AIEnvironment implements ViewInterface {
 
     public void displayATurn(boolean isWhiteTurn) {
         System.out.println("Turn request received.");
+        generateNextState(isWhiteTurn);
+        processNextMove();
+    }
+
+    private void generateNextState(boolean isWhiteTurn) {
         try {
             BufferedImage[] stateImages = generateStateImages(isWhiteTurn);
             System.out.println("State images generated.");
             writeStateToFile(stateImages);
         } catch (IOException io) {
             io.printStackTrace();
-        }
-        PointInterface[] movePoints = getMovesFromFile();
-        clearMoveFile();
-        try {
-            controller.selectAmazonAtPointAndGetMoves(movePoints[0]);
-            controller.makeMoveToPointAndGetShots(movePoints[1]);
-            controller.shootAtPoint(movePoints[2]);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -80,6 +78,23 @@ public class AIEnvironment implements ViewInterface {
             File file = new File(path + i + ".png");
             ImageIO.write(images[i], "png", file);
             System.out.printf("Wrote image %d to path: %s%n", i, file.getAbsolutePath());
+        }
+    }
+
+    private void processNextMove() {
+        PointInterface[] movePoints = getMovesFromFile();
+        clearMoveFile();
+        try {
+            controller.selectAmazonAtPointAndGetMoves(movePoints[0]);
+            controller.makeMoveToPointAndGetShots(movePoints[1]);
+            controller.shootAtPoint(movePoints[2]);
+        } catch (AmazonSelectionException | InvalidMoveException e) {
+            System.out.println(e.toString());
+            controller.rollback();
+            processNextMove();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
         }
     }
 
