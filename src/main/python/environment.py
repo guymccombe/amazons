@@ -15,6 +15,7 @@ class Environment():
         self.process = Popen(
             "java -cp target/classes controller.Controller -env")
 
+    '''
     def getValidMoves(self):
         if self.currentState == None:
             raise Exception("Function called before retrieving game state.")
@@ -41,12 +42,23 @@ class Environment():
             validMoves[i] = validMoves[i] / np.count_nonzero(validMoves[i])
 
         return validMoves
+        '''
 
-    def __validityPoller(self, start, blockers, validMoves, isMove=True):
+    def getPositionOfAmazons(self):
+        return self.currentState[0] // 255
+
+    def getPossibleMovesFrom(self, point):
+        occupiedCells = []
+        for stateImg in self.currentState:
+            occupiedCells += list(map(tuple, np.argwhere(stateImg > 0)))
+        return self.__validityPoller(point, occupiedCells)
+
+    def __validityPoller(self, start, blockers):
+        valid = np.zeros((10, 10))
         for dirX in range(-1, 2):
             for dirY in range(-1, 2):
                 if dirX == 0 and dirY == 0:
-                    continue
+                    continue    # Goes nowhere
 
                 x, y = start
                 x += dirX
@@ -56,16 +68,22 @@ class Environment():
                     if (x, y) in blockers:
                         break
 
-                    if isMove:
-                        if validMoves[1][x][y] != 1:
-                            self.__validityPoller(
-                                (x, y), [blocker for blocker in blockers if blocker != start], validMoves, isMove=False)
-                        validMoves[1][x][y] = 1
-                    else:
-                        validMoves[2][x][y] = 1
+                    valid[x, y] = 1
 
                     x += dirX
                     y += dirY
+
+        return valid
+
+    def getValidShotsFromNewPos(self, newAmazonPos, oldAmazonPos):
+        occupiedCells = []
+        for stateImg in self.currentState:
+            occupiedCells += list(map(tuple, np.argwhere(stateImg > 0)))
+
+        if oldAmazonPos in occupiedCells:
+            occupiedCells.remove(oldAmazonPos)
+
+        return self.__validityPoller(newAmazonPos, occupiedCells)
 
     def move(self, fromXY, toXY, shotXY):
         ''' Sends specified move to environment. '''

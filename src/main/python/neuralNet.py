@@ -69,10 +69,7 @@ class NeuralNet(nn.Module):
         policy = networkInput
         value = networkInput
         for layer in self.policyHead:
-            print(policy.size())
             policy = layer(policy)
-
-        print(policy.size())
 
         for layer in self.valueHead:
             value = layer(value)
