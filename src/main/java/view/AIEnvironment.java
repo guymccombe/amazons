@@ -90,7 +90,6 @@ public class AIEnvironment implements ViewInterface {
             controller.shootAtPoint(movePoints[2]);
         } catch (AmazonSelectionException | InvalidMoveException e) {
             System.out.println(e.toString());
-            controller.rollback();
             processNextMove();
         } catch (Exception e) {
             e.printStackTrace();

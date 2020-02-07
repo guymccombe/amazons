@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Board implements BoardInterface, Cloneable {
+public class Board implements BoardInterface {
     private CellInterface[][] cells;
     private PointInterface[] currentTargets;
     private PointInterface pointOfSelected;
@@ -270,10 +270,5 @@ public class Board implements BoardInterface, Cloneable {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 }
