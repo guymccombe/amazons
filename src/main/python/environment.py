@@ -15,37 +15,10 @@ class Environment():
         self.process = Popen(
             "java -cp target/classes controller.Controller -env")
 
-    '''
-    def getValidMoves(self):
-        if self.currentState == None:
-            raise Exception("Function called before retrieving game state.")
-            return -1
-
-        validMoves = np.zeros_like(self.currentState)
-        validMoves[0] = self.currentState[0] // 255
-
-        locationOfAmazons = list(
-            map(tuple, np.argwhere(self.currentState[0] > 0)))
-
-        occupiedCells = locationOfAmazons
-
-        for i in range(1, 3):
-            occupiedCells += list(map(tuple,
-                                      np.argwhere(self.currentState[i] > 0)))
-
-        for startingLocation in locationOfAmazons:
-            self.__validityPoller(startingLocation, occupiedCells, validMoves)
-
-        validMoves = np.array(validMoves, dtype=np.float)
-
-        for i in range(3):
-            validMoves[i] = validMoves[i] / np.count_nonzero(validMoves[i])
-
-        return validMoves
-        '''
-
     def getPositionOfAmazons(self):
-        return self.currentState[0] // 255
+        posAmazons = self.currentState[0] / 255
+        posAmazons[posAmazons == 0] = -np.inf
+        return posAmazons
 
     def getPossibleMovesFrom(self, point):
         occupiedCells = []
@@ -54,7 +27,7 @@ class Environment():
         return self.__validityPoller(point, occupiedCells)
 
     def __validityPoller(self, start, blockers):
-        valid = np.zeros((10, 10))
+        valid = np.full((10, 10), -np.inf)
         for dirX in range(-1, 2):
             for dirY in range(-1, 2):
                 if dirX == 0 and dirY == 0:
@@ -132,6 +105,7 @@ class Environment():
                             'state/2.png', IMREAD_UNCHANGED)
 
         self.currentState = ownAmazons, oppAmazons, arrows
+        self.__clearState()
         return self.currentState
 
     def kill(self):

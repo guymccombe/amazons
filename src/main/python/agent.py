@@ -63,17 +63,27 @@ class Agent():
                 arrowShotOptimiser.zero_grad()
 
                 policy, value = self.selectionNNet(tensor)
-                mask = self.env.getPositionOfAmazons()
-                argmax = torch.argmax(policy).item()
-                x0, y0 = argmax // 10, argmax % 10
+                target = torch.tensor(self.env.getPositionOfAmazons(
+                ), dtype=torch.float, device=self.device)
 
-                target = torch.tensor(
-                    mask, dtype=torch.float, device=self.device)
+                policy += target  # filter out invalid moves
+
                 selectionLoss = F.kl_div(policy, target)
                 selectionLoss.backward()
                 selectionOptimiser.step()
 
-                isValid = target[x0, y0] == 1
+                x0, y0, target = -1, -1, -1
+                while True:
+                    argmax = torch.argmax(policy).item()
+                    x0, y0 = argmax // 10, argmax % 10
+                    target = torch.tensor(self.env.getPossibleMovesFrom(
+                        (x0, y0)), dtype=torch.float, device=self.device)
+
+                    if torch.sum((target > float("-inf")).int()).item() > 0:
+                        break
+                    else:
+                        policy[x0, y0] = float("-inf")
+                        continue
 
                 selectionAsTensor = torch.zeros_like(policy)
                 selectionAsTensor[x0, y0] = 1
@@ -82,33 +92,31 @@ class Agent():
                     (tensor[0], selectionAsTensor.view(1, 10, 10)), 0).unsqueeze_(0)
 
                 policy, value = self.movementNNet(tensor)
-                mask = self.env.getPossibleMovesFrom((x0, y0))
+
+                policy += target
+
                 argmax = torch.argmax(policy).item()
                 x1, y1 = argmax // 10, argmax % 10
 
-                target = torch.tensor(
-                    mask, dtype=torch.float, device=self.device)
                 movementLoss = F.kl_div(policy, target)
                 movementLoss.backward()
                 movementOptimiser.step()
-
-                isValid &= target[x1, y1] == 1
 
                 tensor[0, 3, x0, y0] = 0
                 tensor[0, 3, x1, y1] = 1
 
                 policy, value = self.arrowShotNNet(tensor)
-                mask = self.env.getValidShotsFromNewPos((x1, y1), (x0, y0))
+                target = torch.tensor(self.env.getValidShotsFromNewPos(
+                    (x1, y1), (x0, y0)), dtype=torch.float, device=self.device)
+
+                policy += target
+
                 argmax = torch.argmax(policy).item()
                 x2, y2 = argmax // 10, argmax % 10
 
-                target = torch.tensor(
-                    mask, dtype=torch.float, device=self.device)
                 arrowShotLoss = F.kl_div(policy, target)
                 arrowShotLoss.backward()
                 arrowShotOptimiser.step()
-
-                isValid &= target[x2, y2] == 1
 
                 visualisation = np.zeros((3, 10, 10))
                 visualisation[0, x0, y0] = 255
@@ -119,8 +127,10 @@ class Agent():
                     visualisation), win="Next move")
                 # self.visdom.image(self.__resizeTensorForDisplay(value), win="Value")
 
-                if isValid:
-                    self.env.move((x0, y0), (x1, y1), (x2, y2))
+                self.visdom.image(self.__resizeTensorForDisplay(
+                    target), win="Shot mapping")
+
+                self.env.move((x0, y0), (x1, y1), (x2, y2))
 
             print(f"Episode {episode} finished.")
             episode += 1
