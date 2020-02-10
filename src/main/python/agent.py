@@ -66,11 +66,11 @@ class Agent():
                 target = torch.tensor(self.env.getPositionOfAmazons(
                 ), dtype=torch.float, device=self.device)
 
-                policy += target  # filter out invalid moves
-
                 selectionLoss = F.kl_div(policy, target)
                 selectionLoss.backward()
                 selectionOptimiser.step()
+
+                policy *= target  # filter out invalid moves
 
                 x0, y0, target = -1, -1, -1
                 while True:
@@ -92,15 +92,14 @@ class Agent():
                     (tensor[0], selectionAsTensor.view(1, 10, 10)), 0).unsqueeze_(0)
 
                 policy, value = self.movementNNet(tensor)
-
-                policy += target
-
-                argmax = torch.argmax(policy).item()
-                x1, y1 = argmax // 10, argmax % 10
-
                 movementLoss = F.kl_div(policy, target)
                 movementLoss.backward()
                 movementOptimiser.step()
+
+                policy *= target
+
+                argmax = torch.argmax(policy).item()
+                x1, y1 = argmax // 10, argmax % 10
 
                 tensor[0, 3, x0, y0] = 0
                 tensor[0, 3, x1, y1] = 1
@@ -109,14 +108,14 @@ class Agent():
                 target = torch.tensor(self.env.getValidShotsFromNewPos(
                     (x1, y1), (x0, y0)), dtype=torch.float, device=self.device)
 
-                policy += target
-
-                argmax = torch.argmax(policy).item()
-                x2, y2 = argmax // 10, argmax % 10
-
                 arrowShotLoss = F.kl_div(policy, target)
                 arrowShotLoss.backward()
                 arrowShotOptimiser.step()
+
+                policy *= target
+
+                argmax = torch.argmax(policy).item()
+                x2, y2 = argmax // 10, argmax % 10
 
                 visualisation = np.zeros((3, 10, 10))
                 visualisation[0, x0, y0] = 255

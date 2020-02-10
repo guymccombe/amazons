@@ -41,18 +41,18 @@ class NeuralNet(nn.Module):
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
         layers.append(nn.Linear(10, 10))
+        layers.append(nn.Softmax2d())
         return layers
 
     def __valueHead(self):
-        # TODO - currently generating wrong dimension
         layers = nn.ModuleList()
         layers.append(nn.Conv2d(in_channels=500, out_channels=1,
-                                kernel_size=1, padding=1, bias=False))
+                                kernel_size=1, padding=0, bias=False))
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
-        layers.append(nn.Linear(12, 25))
+        layers.append(nn.Linear(10, 10))
         layers.append(nn.ReLU())
-        layers.append(nn.Linear(25, 12))
+        layers.append(nn.Linear(10, 10))
         layers.append(nn.Tanh())
         return layers
 
