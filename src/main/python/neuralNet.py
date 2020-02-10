@@ -88,10 +88,19 @@ class NeuralNet(nn.Module):
         path = join(dirname(__file__), f"models\\{name}.pth")
         self.__loadPath(path)
 
-    def loadMostRecent(self):
+    def loadMostRecent(self, typeOfNet):
         directory = join(dirname(__file__), "models")
-        allPaths = [join(directory, name) for name in listdir(directory)]
+        allPaths = [join(directory, name)
+                    for name in listdir(directory) if typeOfNet in name]
+
+        print(allPaths)
+
         if len(allPaths) < 1:
             print("There are no saved models in the models folder. Starting fresh..")
         else:
             self.__loadPath(max(allPaths, key=getctime))
+
+
+if __name__ == "__main__":
+    net = NeuralNet()
+    net.loadMostRecent("a")

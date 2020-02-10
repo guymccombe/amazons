@@ -1,13 +1,12 @@
 from environment import Environment
 from neuralNet import NeuralNet
 
-import time
 import numpy as np
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-
 import visdom
 
 
@@ -24,13 +23,16 @@ class Agent():
         self.movementNNet = NeuralNet(4).to(self.device)
         self.arrowShotNNet = NeuralNet(4).to(self.device)
 
-        # TODO adapt for 3x nnets
-        '''
         if modelByRecent:
-            self.net.loadMostRecent()
+            self.selectionNNet.loadMostRecent("a")
+            self.movementNNet.loadMostRecent("b")
+            self.arrowShotNNet.loadMostRecent("c")
         if modelByName != "":
-            self.net.load(modelByName)
-        '''
+            self.selectionNNet.load(modelByName)
+            modelByName.replace("a.pth", "b.pth")
+            self.movementNNet.load(modelByName)
+            modelByName.replace("b.pth", "c.pth")
+            self.arrowShotNNet.load(modelByName)
 
         self.train()
 
@@ -43,8 +45,6 @@ class Agent():
             self.movementNNet.parameters(), lr=0.001)
         arrowShotOptimiser = torch.optim.Adam(
             self.arrowShotNNet.parameters(), lr=0.001)
-
-        modelName = time.time()
 
         episode = 0
         while episode < self.EPISODES:
@@ -135,10 +135,15 @@ class Agent():
             print(f"Episode {episode} finished.")
             episode += 1
 
-            # self.net.save(modelName)
-
     def __resizeTensorForDisplay(self, tensor):
         return tensor
+
+    def __saveNets(self):
+        name = time.time()
+
+        self.selectionNNet.save(name + "a")
+        self.movementNNet.save(name + "b")
+        self.arrowShotNNet.save(name + "c")
 
     def eval(self):
         pass
