@@ -79,10 +79,10 @@ class Agent():
                     target = torch.tensor(self.env.getPossibleMovesFrom(
                         (x0, y0)), dtype=torch.float, device=self.device)
 
-                    if torch.sum((target > float("-inf")).int()).item() > 0:
+                    if torch.sum((target > 0).int()).item() > 0:
                         break
                     else:
-                        policy[x0, y0] = float("-inf")
+                        policy[x0, y0] = 0
                         continue
 
                 selectionAsTensor = torch.zeros_like(policy)
