@@ -122,7 +122,7 @@ class mcts():
 
             validCoordinates = np.nonzero(validSelections)
             self.valids[bestMoveString] = validCoordinates
-            return -values
+            return [-value for value in values]
 
         validShots = self.valids[bestMoveString]
         bestScore = float("-inf")
@@ -167,9 +167,12 @@ class mcts():
                 self.qValues[pairs[i]] = values[i]
                 self.edgeVisitQuantity[pairs[i]] = 1
 
-            self.nodeVisitQuantity[pairs[i][0]] += 1
+            if pairs[i][0] in self.nodeVisitQuantity:
+                self.nodeVisitQuantity[pairs[i][0]] += 1
+            else:
+                self.nodeVisitQuantity[pairs[i][0]] = 1
 
-        return -values
+        return [-value for value in values]
 
 
 if __name__ == "__main__":
