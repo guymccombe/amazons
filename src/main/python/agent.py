@@ -131,8 +131,14 @@ class Agent():
 
                 self.env.move((x0, y0), (x1, y1), (x2, y2))
 
-            print(f"Episode {episode} finished.")
+            reward = self.env.getReward()
+            whiteWon = reward[0] > 0
+            print(
+                f"Episode {episode} finished. {'White' if whiteWon else 'Black'}. The reward pairing is: {reward}")
             episode += 1
+
+            self.env.kill()
+            self.env = Environment()
 
     def __resizeTensorForDisplay(self, tensor):
         return tensor

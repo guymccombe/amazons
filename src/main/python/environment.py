@@ -81,7 +81,7 @@ class Environment():
             return -1
 
         rewardMagnitude = img.shape[0]
-        if img[0, 0][0] == 1:  # If white won
+        if img[0, 0] > 0:  # If white won
             rewards = rewardMagnitude, -rewardMagnitude
         else:
             rewards = -rewardMagnitude, rewardMagnitude

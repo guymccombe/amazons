@@ -22,7 +22,6 @@ public class AIEnvironment implements ViewInterface {
     private Controller controller;
 
     public void displayATurn(boolean isWhiteTurn) {
-        System.out.println("Turn request received.");
         generateNextState(isWhiteTurn);
         processNextMove();
     }
@@ -30,7 +29,6 @@ public class AIEnvironment implements ViewInterface {
     private void generateNextState(boolean isWhiteTurn) {
         try {
             BufferedImage[] stateImages = generateStateImages(isWhiteTurn);
-            System.out.println("State images generated.");
             writeStateToFile(stateImages);
         } catch (IOException io) {
             io.printStackTrace();
@@ -77,7 +75,6 @@ public class AIEnvironment implements ViewInterface {
         for (int i = 0; i < images.length; i++) {
             File file = new File(path + i + ".png");
             ImageIO.write(images[i], "png", file);
-            System.out.printf("Wrote image %d to path: %s%n", i, file.getAbsolutePath());
         }
     }
 
@@ -156,6 +153,9 @@ public class AIEnvironment implements ViewInterface {
 
     private void addEmptyNeighbours(CellStatus[][] board, int x, int y,
             ArrayList<PointInterface> listOfAvailableCells) {
+        if (x < 0 || y < 0 || x >= board.length || y >= board.length) {
+            return;
+        }
         if (board[x][y] != CellStatus.EMPTY || listOfAvailableCells.contains(new Point(x, y))) {
             return;
         } else {
@@ -169,6 +169,9 @@ public class AIEnvironment implements ViewInterface {
     }
 
     private BufferedImage generateRewardImage(int reward, boolean winnerIsWhite) {
+        if (reward == 0) {
+            reward++;
+        }
         BufferedImage img = new BufferedImage(1, reward, BufferedImage.TYPE_BYTE_BINARY);
         if (winnerIsWhite) {
             img.setRGB(0, 0, Color.WHITE.getRGB());
