@@ -51,7 +51,7 @@ class Agent():
             while not self.env.isGameFinished():
                 state = self.env.getState()
                 tensor = torch.tensor(state, dtype=torch.float,
-                                      device=self.device) / 255
+                                      device=self.device)
 
                 self.visdom.image(
                     self.__resizeTensorForDisplay(tensor), win="State")
