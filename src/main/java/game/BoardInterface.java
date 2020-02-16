@@ -14,4 +14,6 @@ public interface BoardInterface {
                         throws PointOutOfBoundsException, InvalidMoveException;
 
         public Boolean isWhiteTheWinner();
+
+        public Object clone();
 }

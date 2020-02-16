@@ -17,6 +17,9 @@ import view.ViewInterface;
 public class Controller {
     private ViewInterface view;
     private BoardInterface model;
+    private boolean isWhitesTurn = true;
+    private BoardInterface checkpoint;
+    private boolean wasWhitesTurn;
 
     public Controller(ViewInterface view) {
         this.model = new Board();
@@ -29,7 +32,6 @@ public class Controller {
     }
 
     private void startGameLoop() {
-        boolean isWhitesTurn = true;
         while (model.isWhiteTheWinner() == null) {
             view.displayATurn(isWhitesTurn);
             isWhitesTurn = !isWhitesTurn;
@@ -58,6 +60,16 @@ public class Controller {
 
     public void newGame(ViewInterface view) {
         new Controller(view);
+    }
+
+    public void saveCheckpoint() {
+        checkpoint = board.clone();
+        wasWhitesTurn = isWhitesTurn;
+    }
+
+    public void rollback() {
+        board = checkpoint;
+        isWhitesTurn = wasWhitesTurn;
     }
 
     public static void main(String args[]) {

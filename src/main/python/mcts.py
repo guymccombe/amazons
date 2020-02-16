@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 
-class mcts():
+class MCTS():
 
     def __init__(self, env, nets):
         self.env = env
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     n1 = NeuralNet()
     n2 = NeuralNet(4)
     n3 = NeuralNet(4)
-    mcts = mcts(env, (n1, n2, n3))
+    mcts = MCTS(env, (n1, n2, n3))
     mcts.search()
     mcts.search()
     mcts.search()

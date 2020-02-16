@@ -60,6 +60,7 @@ class Environment():
         ''' Sends specified move to environment. '''
         self.currentState = None
         self.__writeMove((fromXY, toXY, shotXY))
+        self.__writeToCheckpoint("-")
 
     def __writeMove(self, move):
         with open(self.pathToImages + "move/next.MOVE", "w+") as moveFile:
@@ -123,6 +124,17 @@ class Environment():
                 string += str(char)
             string += " "
         return string
+
+    def saveCheckpoint(self):
+        self.__writeToCheckpoint("checkpoint")
+        
+    def __writeToCheckpoint(self, str):
+        with open(self.pathToImages + "move/next.RLBK", "w+") as file:
+            file.write(str)
+
+    def loadCheckpoint(self):
+        self.__writeToCheckpoint("rollback")
+
 
 
 if __name__ == "__main__":

@@ -17,13 +17,20 @@ import game.CellStatus;
 import game.InvalidMoveException;
 import game.Point;
 import game.PointInterface;
+import view.ModelInconsistent;
 
 public class AIEnvironment implements ViewInterface {
     private Controller controller;
 
     public void displayATurn(boolean isWhiteTurn) {
         generateNextState(isWhiteTurn);
-        processNextMove();
+        try {
+            processMCTSRollback();
+            processNextMove();
+        } catch (ModelInconsistent e) {
+            return;
+        }
+
     }
 
     private void generateNextState(boolean isWhiteTurn) {
@@ -77,6 +84,24 @@ public class AIEnvironment implements ViewInterface {
             ImageIO.write(images[i], "png", file);
         }
     }
+
+    private void processMCTSRollback() throws ModelInconsistent {
+        String path = "src\\main\\interfaces\\move\\next.RLBK";
+        File file = new File(path);
+        while (file.length() == 0);
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine();
+            if (line.contains("rollback")) {
+                controller.rollback();
+                throw new ModelInconsistent("Rollback occured.")
+            }
+            if (line.contains(("checkpoint"))) {
+                controller.saveCheckpoint();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
     private void processNextMove() {
         PointInterface[] movePoints = getMovesFromFile();
