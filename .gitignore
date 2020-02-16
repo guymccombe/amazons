@@ -1,6 +1,3 @@
-.vscode
-.settings
-target
-src/main/interfaces
-__pycache__
+.*
+_*
 models
