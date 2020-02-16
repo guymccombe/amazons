@@ -32,7 +32,7 @@ class MCTS():
 
         if stateString not in self.policies:
             self.policies[stateString], values[0] = self.nets[0](stateTensor)
-            validSelections = torch.tensor(self.env.getPositionOfAmazons())
+            validSelections = torch.tensor(self.env.getSelectionMask())
 
             self.policies[stateString] *= validSelections  # mask out invalids
 
@@ -53,7 +53,7 @@ class MCTS():
             selectionString = self.env.toString(selectionTuple)
 
             if selectionString not in self.valids:
-                self.valids[selectionString] = self.env.getPossibleMovesFrom(
+                self.valids[selectionString] = self.env.getMovementMask(
                     selection)
 
             if len(np.nonzero(self.valids[selectionString])) < 1:
@@ -115,7 +115,7 @@ class MCTS():
         if bestMoveString not in self.policies:
             self.policies[bestMoveString], values[2] = self.nets[2](shotTensor)
             validSelections = torch.tensor(
-                self.env.getValidShotsFromNewPos(bestMove, bestSelection))
+                self.env.getShotMask(bestMove, bestSelection))
 
             # mask out invalids
             self.policies[bestMoveString] *= validSelections
