@@ -18,12 +18,12 @@ class Agent():
                 env = Environment()
                 while not env.isGameFinished():
                     mcts = MCTS(env, nnets)
-                    print("Saving new checkpoint")
                     env.saveCheckpoint()
                     for search in range(searchesPerMove):
-                        print(f"Entering state:\n{env.getState()}")
                         mcts.search()
                         env.loadCheckpoint()
+
+                # make best move
 
     def __loadNNets(self, name):
         nNetA = NeuralNet(in_channels=3)
