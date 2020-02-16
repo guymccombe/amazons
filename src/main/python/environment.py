@@ -127,14 +127,13 @@ class Environment():
 
     def saveCheckpoint(self):
         self.__writeToCheckpoint("checkpoint")
-        
+
     def __writeToCheckpoint(self, str):
         with open(self.pathToImages + "move/next.RLBK", "w+") as file:
             file.write(str)
 
     def loadCheckpoint(self):
         self.__writeToCheckpoint("rollback")
-
 
 
 if __name__ == "__main__":

@@ -275,9 +275,11 @@ public class Board implements BoardInterface, Cloneable {
     @Override
     public Object clone() {
         try {
-            return (BoardInterface) super.clone();
+            Object clone = super.clone();
+            return super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
+            return null;
         }
     }
 }

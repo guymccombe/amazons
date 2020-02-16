@@ -63,12 +63,12 @@ public class Controller {
     }
 
     public void saveCheckpoint() {
-        checkpoint = board.clone();
+        checkpoint = (BoardInterface) model.clone();
         wasWhitesTurn = isWhitesTurn;
     }
 
     public void rollback() {
-        board = checkpoint;
+        model = checkpoint;
         isWhitesTurn = wasWhitesTurn;
     }
 

@@ -93,7 +93,7 @@ public class AIEnvironment implements ViewInterface {
             String line = reader.readLine();
             if (line.contains("rollback")) {
                 controller.rollback();
-                throw new ModelInconsistent("Rollback occured.")
+                throw new ModelInconsistent("Rollback occured.");
             }
             if (line.contains(("checkpoint"))) {
                 controller.saveCheckpoint();
@@ -102,6 +102,7 @@ public class AIEnvironment implements ViewInterface {
             e.printStackTrace();
             return;
         }
+    }
 
     private void processNextMove() {
         PointInterface[] movePoints = getMovesFromFile();
