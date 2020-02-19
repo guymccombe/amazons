@@ -53,6 +53,7 @@ class NeuralNet(nn.Module):
         layers.append(nn.Linear(10, 10))
         layers.append(nn.ReLU())
         layers.append(nn.Linear(10, 10))
+        layers.append(nn.MaxPool2d(10))
         layers.append(nn.Tanh())
         return layers
 
