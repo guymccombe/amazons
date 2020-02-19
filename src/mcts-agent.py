@@ -2,6 +2,7 @@ from mcts import MCTS
 from environment import Environment
 from neuralNet import NeuralNet
 
+import numpy as np
 import torch
 
 
@@ -10,7 +11,7 @@ class Agent():
     def __init__(self, currentBestNNet=None):
         self.CURRENT_BEST_NNET = currentBestNNet
 
-    def train(self, loops=100, games=2500, searchesPerMove=1000):
+    def train(self, loops=100, games=2500, searchesPerMove=5):
         nnets = self.__loadNNets(self.CURRENT_BEST_NNET)
         for loop in range(loops):
 
@@ -24,7 +25,12 @@ class Agent():
                         mcts.search()
                         env.loadCheckpoint()
 
-                # make best move
+                    nextMove = self.__randomlySampleMove(env, mcts)
+
+    def __randomlySampleMove(self, env, tree):
+        currentState = env.toString()
+        selection = tree.weightedRandomAction(currentState)
+        # TODO movement and shooting
 
     def __loadNNets(self, name):
         nNetA = NeuralNet(in_channels=3)

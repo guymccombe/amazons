@@ -72,7 +72,11 @@ class Environment():
 
         return self.__validityPoller(newAmazonPos, occupiedCells)
 
-    def toString(self, state):
+    def toString(self, state=None):
+
+        if state is None:
+            state = self.currentCheckpoint["board"]
+
         string = ""
         for arr in state:
             for char in np.nditer(arr):

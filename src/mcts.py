@@ -3,6 +3,7 @@ from neuralNet import NeuralNet
 
 from math import sqrt
 import numpy as np
+from random import random
 import torch
 
 
@@ -144,9 +145,6 @@ class MCTS():
                 bestScore = score
                 bestShot = shot
 
-        print("Descending through: " +
-              f"({bestSelection}), ({bestMove}), ({bestShot})")
-
         self.env.move(bestSelection, bestMove, bestShot)
 
         values = self.search()
@@ -175,3 +173,23 @@ class MCTS():
                 self.nodeVisitQuantity[pairs[i][0]] = 1
 
         return [-value for value in values]
+
+    def weightedRandomAction(self, state):
+
+        print(self.edgeVisitQuantity)
+
+        filtered = {key: value for (key, value)
+                    in self.edgeVisitQuantity.items() if key[0] == state}
+
+        total = sum(filtered.values())
+        adjusted = {key: value / total
+                    for (key, value) in filtered.items()}
+
+        randomChoice, total, action = random(), 0, None
+        for key, value in adjusted.items():
+            total += value
+            if randomChoice <= total:
+                action = key
+                break
+
+        return action

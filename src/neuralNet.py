@@ -17,26 +17,26 @@ class NeuralNet(nn.Module):
 
     def __inputLayer(self, in_channels):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels, out_channels=500,
+        layers.append(nn.Conv2d(in_channels, out_channels=300,
                                 kernel_size=3, padding=1, bias=False))
-        layers.append(nn.BatchNorm2d(500))
+        layers.append(nn.BatchNorm2d(300))
         layers.append(nn.ReLU())
         return layers
 
     def __residualBlock(self):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=500, out_channels=500,
+        layers.append(nn.Conv2d(in_channels=300, out_channels=300,
                                 kernel_size=3, padding=1, bias=False))
-        layers.append(nn.BatchNorm2d(500))
+        layers.append(nn.BatchNorm2d(300))
         layers.append(nn.ReLU())
-        layers.append(nn.Conv2d(in_channels=500, out_channels=500,
+        layers.append(nn.Conv2d(in_channels=300, out_channels=300,
                                 kernel_size=3, padding=1, bias=False))
-        layers.append(nn.BatchNorm2d(500))
+        layers.append(nn.BatchNorm2d(300))
         return layers
 
     def __policyHead(self):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=500, out_channels=1,
+        layers.append(nn.Conv2d(in_channels=300, out_channels=1,
                                 kernel_size=1, padding=0, bias=False))
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
@@ -46,7 +46,7 @@ class NeuralNet(nn.Module):
 
     def __valueHead(self):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=500, out_channels=1,
+        layers.append(nn.Conv2d(in_channels=300, out_channels=1,
                                 kernel_size=1, padding=0, bias=False))
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
