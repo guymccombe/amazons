@@ -64,6 +64,7 @@ class MCTS():
                         self.policies[stateString][selection] * \
                         sqrt(self.nodeVisitQuantity.get(stateString, 0)) / \
                         (self.edgeVisitQuantity.get((stateString, selection), 0) + 1)
+
                 else:
                     score = self.policies[stateString][selection] * \
                         sqrt(self.nodeVisitQuantity.get(stateString, 0))
@@ -156,14 +157,15 @@ class MCTS():
         for i in range(3):
             if pairs[i] in self.qValues:
                 self.qValues[pairs[i]] = (
-                    self.self.qValues[pairs[i]] *
+                    self.qValues[pairs[i]] *
                     self.edgeVisitQuantity[pairs[i]] +
-                    values[i]) / \
-                    self.edgeVisitQuantity[pairs[i]] + 1
+                    values[i] /
+                    (self.edgeVisitQuantity[pairs[i]] + 1))
 
                 self.edgeVisitQuantity[pairs[i]] += 1
 
             else:
+                x, y = pairs[i][1]
                 self.qValues[pairs[i]] = values[i]
                 self.edgeVisitQuantity[pairs[i]] = 1
 
@@ -173,18 +175,3 @@ class MCTS():
                 self.nodeVisitQuantity[pairs[i][0]] = 1
 
         return [-value for value in values]
-
-
-if __name__ == "__main__":
-    # Just for in-dev testing
-    env = Environment()
-    n1 = NeuralNet()
-    n2 = NeuralNet(4)
-    n3 = NeuralNet(4)
-    mcts = MCTS(env, (n1, n2, n3))
-    mcts.search()
-    mcts.search()
-    mcts.search()
-    mcts.search()
-
-    env.kill()

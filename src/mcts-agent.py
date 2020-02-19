@@ -20,6 +20,7 @@ class Agent():
                     mcts = MCTS(env, nnets)
                     env.saveCheckpoint()
                     for search in range(searchesPerMove):
+                        print(f"Search {search + 1}/{searchesPerMove}")
                         mcts.search()
                         env.loadCheckpoint()
 
