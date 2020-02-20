@@ -1,3 +1,4 @@
+from copy import copy
 import numpy as np
 
 
@@ -24,7 +25,7 @@ class Game:
         self.board[1, 9, 6] = 1
 
     def move(self, fromXY, toXY, shootAT):
-        unchangedBoard = self.board
+        unchangedBoard = copy(self.board)
 
         if self.board[int(self.isBlackTurn), fromXY[0], fromXY[1]] == 1:
             if self.__isValidMove(fromXY, toXY):

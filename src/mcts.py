@@ -51,7 +51,7 @@ class MCTS():
             selectionArr = np.zeros((10, 10), dtype=np.uint8)
             selectionArr[selection] = 1
             selectionTuple = state + (selectionArr,)
-            selectionString = self.env.toString(selectionTuple)
+            selectionString = stateString + "".join(str(selection))
 
             if selectionString not in self.valids:
                 self.valids[selectionString] = self.env.getMovementMask(
@@ -175,9 +175,6 @@ class MCTS():
         return [-value for value in values]
 
     def weightedRandomAction(self, state):
-
-        print(self.edgeVisitQuantity)
-
         filtered = {key: value for (key, value)
                     in self.edgeVisitQuantity.items() if key[0] == state}
 
@@ -192,4 +189,4 @@ class MCTS():
                 action = key
                 break
 
-        return action
+        return action[1]

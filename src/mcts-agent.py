@@ -26,11 +26,20 @@ class Agent():
                         env.loadCheckpoint()
 
                     nextMove = self.__randomlySampleMove(env, mcts)
+                    print(f"nextMove = {nextMove}")
+                    env.move(*nextMove)
 
     def __randomlySampleMove(self, env, tree):
         currentState = env.toString()
         selection = tree.weightedRandomAction(currentState)
-        # TODO movement and shooting
+
+        currentState += "".join(str(selection))
+        moveTo = tree.weightedRandomAction(currentState)
+
+        currentState += "".join(str(moveTo))
+        shootAt = tree.weightedRandomAction(currentState)
+
+        return selection, moveTo, shootAt
 
     def __loadNNets(self, name):
         nNetA = NeuralNet(in_channels=3)

@@ -29,10 +29,10 @@ class Environment():
 
     def loadCheckpoint(self):
         self.game.board = copy(self.currentCheckpoint["board"])
-        self.game.isBlackTurn = self.currentCheckpoint["turn"]
+        self.game.isBlackTurn = copy(self.currentCheckpoint["turn"])
 
     def getSelectionMask(self):
-        return self.game.board[0]
+        return self.game.board[int(self.game.isBlackTurn)]
 
     def getMovementMask(self, moveFrom):
         occupiedCells = []
