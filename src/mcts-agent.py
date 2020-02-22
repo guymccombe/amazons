@@ -1,9 +1,9 @@
+import torch
+import numpy as np
+from tqdm import tqdm
 from mcts import MCTS
 from environment import Environment
 from neuralNet import NeuralNet
-
-import numpy as np
-import torch
 
 
 class Agent():
@@ -11,22 +11,20 @@ class Agent():
     def __init__(self, currentBestNNet=None):
         self.CURRENT_BEST_NNET = currentBestNNet
 
-    def train(self, loops=100, games=2500, searchesPerMove=5):
+    def train(self, loops=100, games=2500, searchesPerMove=50):
         nnets = self.__loadNNets(self.CURRENT_BEST_NNET)
-        for loop in range(loops):
-
-            for game in range(games):
+        for loop in (range(loops)):
+            for game in (range(games)):
+                print(f"Playing game {game+1} of {games}")
                 env = Environment()
                 while not env.isGameFinished():
                     mcts = MCTS(env, nnets)
                     env.saveCheckpoint()
-                    for search in range(searchesPerMove):
-                        print(f"Search {search + 1}/{searchesPerMove}")
+                    for search in tqdm(range(searchesPerMove)):
                         mcts.search()
                         env.loadCheckpoint()
 
                     nextMove = self.__randomlySampleMove(env, mcts)
-                    print(f"nextMove = {nextMove}")
                     env.move(*nextMove)
 
     def __randomlySampleMove(self, env, tree):

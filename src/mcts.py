@@ -57,7 +57,7 @@ class MCTS():
                 self.valids[selectionString] = self.env.getMovementMask(
                     selection)
 
-            if len(np.nonzero(self.valids[selectionString])) < 1:
+            if len(np.transpose(np.nonzero(self.valids[selectionString]))) < 1:
                 self.policies[stateString][selection] = 0
             else:
                 if (stateString, selection) in self.qValues:
@@ -94,6 +94,7 @@ class MCTS():
         # Choose coord to move to
         for moveTo in validCoordinates:
             moveTo = tuple(coord.item() for coord in moveTo)
+
             if (bestSelectionStr, moveTo) in self.qValues:
                 score = self.qValues[(bestSelectionStr, moveTo)] + \
                     self.policies[bestSelectionStr][moveTo] * \
