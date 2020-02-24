@@ -9,9 +9,10 @@ import torch
 
 class MCTS():
 
-    def __init__(self, env, nets):
+    def __init__(self, env, nets, device):
         self.env = env
         self.nets = nets
+        self.device = device
 
         self.qValues = {}
         self.policies = {}
@@ -29,11 +30,13 @@ class MCTS():
 
         state = self.env.getState()
         stateString = self.env.toString(state)
-        stateTensor = torch.tensor(state, dtype=torch.float).unsqueeze_(0)
+        stateTensor = torch.tensor(
+            state, dtype=torch.float, device=self.device).unsqueeze_(0)
 
         if stateString not in self.policies:
             self.policies[stateString], values[0] = self.nets[0](stateTensor)
-            validSelections = torch.tensor(self.env.getSelectionMask())
+            validSelections = torch.tensor(
+                self.env.getSelectionMask(), device=self.device)
 
             self.policies[stateString] *= validSelections  # mask out invalids
 
@@ -78,13 +81,13 @@ class MCTS():
 
         if bestSelectionStr not in self.policies:
             movementTensor = torch.tensor(
-                bestSelectionArr, dtype=torch.float).unsqueeze(0)
+                bestSelectionArr, dtype=torch.float, device=self.device).unsqueeze(0)
             self.policies[bestSelectionStr], values[1] = self.nets[1](
                 movementTensor)
 
             # mask out invalids
             self.policies[bestSelectionStr] *= torch.tensor(
-                self.valids[bestSelectionStr])
+                self.valids[bestSelectionStr], device=self.device)
 
         validCoordinates = np.transpose(
             np.nonzero(self.valids[bestSelectionStr]))
@@ -109,7 +112,8 @@ class MCTS():
                 bestMove = moveTo
 
         bestMoveString = bestSelectionStr + "".join(str(bestMove))
-        shotTensor = torch.tensor(bestSelectionArr, dtype=torch.float)
+        shotTensor = torch.tensor(
+            bestSelectionArr, dtype=torch.float, device=self.device)
         shotTensor[0][bestSelection], shotTensor[0][bestMove] = 0, 1
         shotTensor[3][bestSelection], shotTensor[3][bestMove] = 0, 1
         shotTensor.unsqueeze_(0)
@@ -118,7 +122,7 @@ class MCTS():
         if bestMoveString not in self.policies:
             self.policies[bestMoveString], values[2] = self.nets[2](shotTensor)
             validSelections = torch.tensor(
-                self.env.getShotMask(bestMove, bestSelection))
+                self.env.getShotMask(bestMove, bestSelection), device=self.device)
 
             # mask out invalids
             self.policies[bestMoveString] *= validSelections
