@@ -41,7 +41,7 @@ class NeuralNet(nn.Module):
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
         layers.append(nn.Linear(10, 10))
-        layers.append(nn.Softmax(-1))
+        layers.append(nn.Sigmoid())
         return layers
 
     def __valueHead(self):

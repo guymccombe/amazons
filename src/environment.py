@@ -15,6 +15,9 @@ class Environment():
     def getState(self):
         return tuple(self.game.board)
 
+    def isBlackTurn(self):
+        return self.game.isBlackTurn
+
     def getReward(self):
         return self.game.calculateReward()
 
@@ -78,8 +81,11 @@ class Environment():
             state = self.currentCheckpoint["board"]
 
         string = ""
-        for arr in state:
-            for char in np.nditer(arr):
-                string += str(char)
-            string += " "
+        for arr in state[:-1]:
+            for point in np.transpose(np.nonzero(arr)):
+                string += str(point)
+
+        for char in np.nditer(state[-1]):
+            string += str(char)
+
         return string

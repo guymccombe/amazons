@@ -61,7 +61,17 @@ class MCTS():
                     selection)
 
             if len(np.transpose(np.nonzero(self.valids[selectionString]))) < 1:
-                self.policies[stateString][selection] = 0
+                valid = self.valids[stateString]
+                selectionTensor = torch.tensor(
+                    selection, device=self.device, dtype=torch.float)
+
+                for i in range(len(valid)):
+                    if torch.all(torch.eq(valid[i],  selectionTensor)):
+                        valid = torch.cat([valid[:i], valid[i+1:]])
+                        break
+
+                self.valids[stateString] = valid
+
             else:
                 if (stateString, selection) in self.qValues:
                     score = self.qValues[(stateString, selection)] + \
@@ -179,7 +189,22 @@ class MCTS():
 
         return [-value for value in values]
 
-    def weightedRandomAction(self, state):
+    def getRandomMove(self):
+        selectionState = self.env.toString()
+        selection, selPolicy = self.__weightedRandomAction(selectionState)
+
+        movementState = selectionState + "".join(str(selection))
+        moveTo, movePolicy = self.__weightedRandomAction(movementState)
+
+        shootAtState = movementState + "".join(str(moveTo))
+        shootAt, shotPolicy = self.__weightedRandomAction(shootAtState)
+
+        return (selection, moveTo, shootAt), [[selectionState, selPolicy, self.env.isBlackTurn()],
+                                              [movementState, movePolicy,
+                                               self.env.isBlackTurn()],
+                                              [shootAtState, shotPolicy, self.env.isBlackTurn()]]
+
+    def __weightedRandomAction(self, state):
         filtered = {key: value for (key, value)
                     in self.edgeVisitQuantity.items() if key[0] == state}
 
@@ -194,4 +219,8 @@ class MCTS():
                 action = key
                 break
 
-        return action[1]
+        policy = {}
+        for key in adjusted.keys():
+            policy[key[1]] = adjusted[key]
+
+        return action[1], policy

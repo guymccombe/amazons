@@ -13,13 +13,13 @@ class Agent():
         self.device = (torch.device("cuda") if torch.cuda.is_available()
                        else torch.device("cpu"))
 
-    def train(self, loops=100, games=2500, searchesPerMove=100):
+    def train(self, loops=1, games=1, searchesPerMove=5):
         nnets = self.__loadNNets(self.CURRENT_BEST_NNET)
         for loop in (range(loops)):
             for game in (range(games)):
                 print(f"Playing game {game+1} of {games}")
                 env = Environment()
-                movesTaken = []
+                actionsTaken = []
                 while not env.isGameFinished():
                     mcts = MCTS(env, nnets, self.device)
                     env.saveCheckpoint()
@@ -27,21 +27,16 @@ class Agent():
                         mcts.search()
                         env.loadCheckpoint()
 
-                    nextMove, statesVisited = self.__randomlySampleMove(
-                        env, mcts)
+                    nextMove, actions = mcts.getRandomMove()
                     env.move(*nextMove)
+                    actionsTaken += actions
 
-    def __randomlySampleMove(self, env, tree):
-        selectionState = env.toString()
-        selection = tree.weightedRandomAction(selectionState)
+                reward = env.getReward()
+                isBlackWinner = not env.isBlackTurn()
 
-        movementState = selectionState + "".join(str(selection))
-        moveTo = tree.weightedRandomAction(movementState)
-
-        shootAtState = movementState + "".join(str(moveTo))
-        shootAt = tree.weightedRandomAction(shootAtState)
-
-        return (selection, moveTo, shootAt), (selectionState, movementState, shootAtState)
+                for action in actionsTaken:
+                    wasBlackTurn = action[2]
+                    action[2] = reward if wasBlackTurn != isBlackWinner else -reward
 
     def __loadNNets(self, name):
         nNetA = NeuralNet(in_channels=3).to(self.device)
