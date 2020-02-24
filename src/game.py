@@ -68,9 +68,12 @@ class Game:
                     if (i, j) != (0, 0):
                         pos = amazon[0] + i, amazon[1] + j
                         if self.__isInBoard(pos):
+                            isPosEmpty = True
                             for k in range(3):
-                                if self.board[k, pos[0], pos[1]] == 0:
-                                    return False
+                                isPosEmpty &= self.board[k,
+                                                         pos[0], pos[1]] == 0
+                            if isPosEmpty:
+                                return False
         return True
 
     def __isInBoard(self, pos):
