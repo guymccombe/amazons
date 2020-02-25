@@ -89,3 +89,33 @@ class Environment():
             string += str(char)
 
         return string
+
+    def parseState(self, string):
+        amazons = []
+        for i in range(8):
+            amazons += [(int(string[4*i+1+i]), int(string[4*i+3+i]))]
+
+        ownAmazons = np.zeros((10, 10), dtype=np.uint8)
+        for amazon in amazons[:4]:
+            ownAmazons[amazon] = 1
+
+        oppAmazons = np.zeros((10, 10), dtype=np.uint8)
+        for amazon in amazons[4:]:
+            oppAmazons[amazon] = 1
+
+        arrows = np.fromstring(string[40:140], dtype=np.uint8)
+        arrows -= ord('0')  # Convert from unicode to binary
+        arrows = np.reshape(arrows, (10, 10))
+
+        selection, movement = None, None
+
+        print(string)
+        print(len(string))
+
+        if len(string) > 140:
+            selection = (int(string[141]), int(string[144]))
+
+        if len(string) > 146:
+            movement = (int(string[147]), int(string[150]))
+
+        return ownAmazons, oppAmazons, arrows, selection, movement
