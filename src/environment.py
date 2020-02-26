@@ -109,9 +109,6 @@ class Environment():
 
         selection, movement = None, None
 
-        print(string)
-        print(len(string))
-
         if len(string) > 140:
             selection = (int(string[141]), int(string[144]))
 

@@ -1,6 +1,7 @@
+from ast import literal_eval
 import csv
-from os.path import join, dirname
 import numpy as np
+from os.path import join, dirname
 import pandas as pd
 from random import randint
 import torch
@@ -19,7 +20,7 @@ class Agent():
                        else torch.device("cpu"))
 
     def train(self, loops=1, games=0, searchesPerMove=5, numberOfSamples=1):
-        nnets = self.__loadNNets(self.CURRENT_BEST_NNET)
+        nnets, optimisers = self.__loadNNets(self.CURRENT_BEST_NNET)
         for loop in range(loops):
             for game in range(games):
                 print(f"Playing game {game+1} of {games}")
@@ -66,6 +67,7 @@ class Agent():
 
             for sample in samples:
                 state, policy, value = actions.iloc[sample]
+                policy = literal_eval(policy)
                 own, opp, arr, sel, mov = env.parseState(state)
 
                 if sel is not None:
@@ -88,10 +90,25 @@ class Agent():
                 state = (torch.tensor(state, dtype=torch.float, device=self.device)
                          .unsqueeze(0))
 
+                optimisers[nnetIndex].zero_grad()
                 predictedPolicy, predictedValue = nnets[nnetIndex](state)
-                print(predictedPolicy, policy)
-                print(predictedValue, value)
-                # TODO xentropy policies and MSE value
+
+                policyT = torch.zeros((10, 10),
+                                      dtype=torch.float, device=self.device)
+                for action in policy.keys():
+                    policyT[action] = policy[action]
+
+                valueT = torch.tensor(value,
+                                      dtype=torch.float, device=self.device)
+
+                # Cross entropy
+                xEntropy = -torch.log((1-policyT)-predictedPolicy)
+                squareErr = (predictedValue - valueT)**2    # Square error
+
+                loss = xEntropy + squareErr
+
+                loss.mean().backward()
+                optimisers[nnetIndex].step()
 
     def __loadNNets(self, name):
         nNetA = NeuralNet(in_channels=3).to(self.device)
@@ -108,7 +125,10 @@ class Agent():
             name.replace("b.pth", "c.pth")
             nNetC.load(name)
 
-        return nNetA, nNetB, nNetC
+        nnets = nNetA, nNetB, nNetC
+        optimisers = tuple(torch.optim.Adam(
+            N.parameters(), lr=0.0001) for N in nnets)
+        return nnets, optimisers
 
 
 if __name__ == "__main__":
