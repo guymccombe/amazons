@@ -19,7 +19,7 @@ class Environment():
         return self.game.isBlackTurn
 
     def getReward(self):
-        return self.game.calculateReward()
+        return self.game.calculateReward()/50
 
     def move(self, fromXY, toXY, shotXY):
         return self.game.move(fromXY, toXY, shotXY)

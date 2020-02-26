@@ -224,3 +224,22 @@ class MCTS():
             policy[key[1]] = adjusted[key]
 
         return action[1], policy
+
+    def getBestMove(self):
+        selectionState = self.env.toString()
+        selection = self.__bestAction(selectionState)
+
+        movementState = selectionState + "".join(str(selection))
+        moveTo = self.__bestAction(movementState)
+
+        shootAtState = movementState + "".join(str(moveTo))
+        shootAt = self.__bestAction(shootAtState)
+
+        return selection, moveTo, shootAt
+
+    def __bestAction(self, state):
+        filtered = {key: value for (key, value)
+                    in self.edgeVisitQuantity.items() if key[0] == state}
+
+        action = max(filtered, key=(lambda key: filtered[key]))
+        return action[1]

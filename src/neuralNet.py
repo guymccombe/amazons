@@ -78,7 +78,7 @@ class NeuralNet(nn.Module):
         return policy.view(10, 10), value
 
     def save(self, name):
-        path = join(dirname(__file__), f"models\\{name}.pth")
+        path = join(dirname(__file__), f"models\\{name}")
         torch.save(self.state_dict(), path)
 
     def __loadPath(self, path):
@@ -86,15 +86,13 @@ class NeuralNet(nn.Module):
         self.eval()
 
     def load(self, name):
-        path = join(dirname(__file__), f"models\\{name}.pth")
+        path = join(dirname(__file__), f"models\\{name}")
         self.__loadPath(path)
 
     def loadMostRecent(self, typeOfNet):
         directory = join(dirname(__file__), "models")
         allPaths = [join(directory, name)
                     for name in listdir(directory) if typeOfNet in name]
-
-        print(allPaths)
 
         if len(allPaths) < 1:
             print("There are no saved models in the models folder. Starting fresh..")
