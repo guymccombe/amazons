@@ -24,7 +24,7 @@ class MCTS():
     def search(self):
         if self.env.isGameFinished():
             # Returns 3-tuple reward
-            return (self.env.getReward(),) * 3
+            return (-self.env.getReward(),) * 3
 
         values = [0, 0, 0]
 
@@ -54,13 +54,14 @@ class MCTS():
             selectionArr = np.zeros((10, 10), dtype=np.uint8)
             selectionArr[selection] = 1
             selectionTuple = state + (selectionArr,)
-            selectionString = stateString + "".join(str(selection))
+            selectionString = stateString + \
+                str(selection[0]) + str(selection[1])
 
             if selectionString not in self.valids:
                 self.valids[selectionString] = self.env.getMovementMask(
                     selection)
 
-            if len(np.transpose(np.nonzero(self.valids[selectionString]))) < 1:
+            if (len(np.transpose(np.nonzero(self.valids[selectionString]))) < 1 and len(np.nonzero(self.valids[selectionString] < 1))):
                 valid = self.valids[stateString]
                 selectionTensor = torch.tensor(
                     selection, device=self.device, dtype=torch.float)
@@ -121,7 +122,7 @@ class MCTS():
                 bestScore = score
                 bestMove = moveTo
 
-        bestMoveString = bestSelectionStr + "".join(str(bestMove))
+        bestMoveString = bestSelectionStr + str(bestMove[0]) + str(bestMove[1])
         shotTensor = torch.tensor(
             bestSelectionArr, dtype=torch.float, device=self.device)
         shotTensor[0][bestSelection], shotTensor[0][bestMove] = 0, 1
@@ -193,10 +194,10 @@ class MCTS():
         selectionState = self.env.toString()
         selection, selPolicy = self.__weightedRandomAction(selectionState)
 
-        movementState = selectionState + "".join(str(selection))
+        movementState = selectionState + str(selection[0]) + str(selection[1])
         moveTo, movePolicy = self.__weightedRandomAction(movementState)
 
-        shootAtState = movementState + "".join(str(moveTo))
+        shootAtState = movementState + str(moveTo[0]) + str(moveTo[1])
         shootAt, shotPolicy = self.__weightedRandomAction(shootAtState)
 
         return (selection, moveTo, shootAt), [[selectionState, selPolicy, self.env.isBlackTurn()],
@@ -229,10 +230,10 @@ class MCTS():
         selectionState = self.env.toString()
         selection = self.__bestAction(selectionState)
 
-        movementState = selectionState + "".join(str(selection))
+        movementState = selectionState + str(selection[0]) + str(selection[1])
         moveTo = self.__bestAction(movementState)
 
-        shootAtState = movementState + "".join(str(moveTo))
+        shootAtState = movementState + str(moveTo[0]) + str(moveTo[1])
         shootAt = self.__bestAction(shootAtState)
 
         return selection, moveTo, shootAt

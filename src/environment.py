@@ -19,7 +19,7 @@ class Environment():
         return self.game.isBlackTurn
 
     def getReward(self):
-        return self.game.calculateReward()/50
+        return self.game.calculateReward()/10
 
     def move(self, fromXY, toXY, shotXY):
         return self.game.move(fromXY, toXY, shotXY)
@@ -83,7 +83,7 @@ class Environment():
         string = ""
         for arr in state[:-1]:
             for point in np.transpose(np.nonzero(arr)):
-                string += str(point)
+                string += str(point[0]) + str(point[1])
 
         for char in np.nditer(state[-1]):
             string += str(char)
@@ -92,8 +92,8 @@ class Environment():
 
     def parseState(self, string):
         amazons = []
-        for i in range(8):
-            amazons += [(int(string[4*i+1+i]), int(string[4*i+3+i]))]
+        for i in range(0, 17, 2):
+            amazons += [(int(string[i]), int(string[i+1]))]
 
         ownAmazons = np.zeros((10, 10), dtype=np.uint8)
         for amazon in amazons[:4]:
@@ -103,16 +103,16 @@ class Environment():
         for amazon in amazons[4:]:
             oppAmazons[amazon] = 1
 
-        arrows = np.fromstring(string[40:140], dtype=np.uint8)
+        arrows = np.fromstring(string[16:116], dtype=np.uint8)
         arrows -= ord('0')  # Convert from unicode to binary
         arrows = np.reshape(arrows, (10, 10))
 
         selection, movement = None, None
 
-        if len(string) > 140:
-            selection = (int(string[141]), int(string[144]))
+        if len(string) > 116:
+            selection = (int(string[116]), int(string[117]))
 
-        if len(string) > 146:
-            movement = (int(string[147]), int(string[150]))
+        if len(string) > 118:
+            movement = (int(string[118]), int(string[119]))
 
         return ownAmazons, oppAmazons, arrows, selection, movement

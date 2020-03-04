@@ -17,26 +17,26 @@ class NeuralNet(nn.Module):
 
     def __inputLayer(self, in_channels):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels, out_channels=300,
+        layers.append(nn.Conv2d(in_channels, out_channels=100,
                                 kernel_size=3, padding=1, bias=False))
-        layers.append(nn.BatchNorm2d(300))
+        layers.append(nn.BatchNorm2d(100))
         layers.append(nn.ReLU())
         return layers
 
     def __residualBlock(self):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=300, out_channels=300,
+        layers.append(nn.Conv2d(in_channels=100, out_channels=100,
                                 kernel_size=3, padding=1, bias=False))
-        layers.append(nn.BatchNorm2d(300))
+        layers.append(nn.BatchNorm2d(100))
         layers.append(nn.ReLU())
-        layers.append(nn.Conv2d(in_channels=300, out_channels=300,
+        layers.append(nn.Conv2d(in_channels=100, out_channels=100,
                                 kernel_size=3, padding=1, bias=False))
-        layers.append(nn.BatchNorm2d(300))
+        layers.append(nn.BatchNorm2d(100))
         return layers
 
     def __policyHead(self):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=300, out_channels=1,
+        layers.append(nn.Conv2d(in_channels=100, out_channels=1,
                                 kernel_size=1, padding=0, bias=False))
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
@@ -46,7 +46,7 @@ class NeuralNet(nn.Module):
 
     def __valueHead(self):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(in_channels=300, out_channels=1,
+        layers.append(nn.Conv2d(in_channels=100, out_channels=1,
                                 kernel_size=1, padding=0, bias=False))
         layers.append(nn.BatchNorm2d(1))
         layers.append(nn.ReLU())
@@ -83,6 +83,7 @@ class NeuralNet(nn.Module):
 
     def __loadPath(self, path):
         self.load_state_dict(torch.load(path))
+        print(f"Loading from {path}")
         self.eval()
 
     def load(self, name):

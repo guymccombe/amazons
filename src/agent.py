@@ -20,7 +20,7 @@ class Agent():
         self.device = (torch.device("cuda") if torch.cuda.is_available()
                        else torch.device("cpu"))
 
-    def train(self, loops=250, games=2000, searchesPerMove=75, numberOfSamples=500):
+    def train(self, loops=5, games=5, searchesPerMove=50, numberOfSamples=4096):
         nnets, optimisers = self.__loadNNets(self.CURRENT_BEST_NNET, True)
         for loop in range(loops):
             print(f"Self-play phase:")
@@ -62,13 +62,16 @@ class Agent():
                            sep="|", index=False, header=False)
 
             samples, env = [], Environment()
-            for _ in range(numberOfSamples):
-                # Randomly sample from DF
-                sampleIndex = randint(0, numberOfActions-1)
-                while sampleIndex in samples:
+            if numberOfActions < numberOfSamples:
+                samples = range(numberOfActions)
+            else:
+                for _ in range(numberOfSamples):
+                    # Randomly sample from DF
                     sampleIndex = randint(0, numberOfActions-1)
+                    while sampleIndex in samples:
+                        sampleIndex = randint(0, numberOfActions-1)
 
-                samples += [sampleIndex]
+                    samples += [sampleIndex]
 
             for sample in tqdm(samples):
                 state, policy, value = actions.iloc[sample]
@@ -120,10 +123,10 @@ class Agent():
             f"Evaluation results: {wins}W and {losses}L --> {100*(wins/(wins+losses))}%")
 
         if wins/(wins+losses) >= 0.55:
-            name = str(datetime.now()) + ".pth"
-            print("New best network is {name}")
+            name = datetime.now().strftime("%d-%m-%y_%H%M.pth")
+            print(f"New best network is {name}")
             self.CURRENT_BEST_NNET = name
-            self.__saveNNets(self, nnets, name)
+            self.__saveNNets(nnets, name)
 
     def __loadNNets(self, name, includeOptimisers=False):
         nNetA = NeuralNet(in_channels=3).to(self.device)
@@ -131,13 +134,13 @@ class Agent():
         nNetC = NeuralNet(in_channels=4).to(self.device)
 
         if name is not None:
-            name.replace(".pth", "a.pth")
+            name = name.replace(".pth", "a.pth")
             nNetA.load(name)
 
-            name.replace("a.pth", "b.pth")
+            name = name.replace("a.pth", "b.pth")
             nNetB.load(name)
 
-            name.replace("b.pth", "c.pth")
+            name = name.replace("b.pth", "c.pth")
             nNetC.load(name)
         else:
             nNetA.loadMostRecent("a.pth")
@@ -147,12 +150,12 @@ class Agent():
         nnets = nNetA, nNetB, nNetC
         if includeOptimisers:
             optimisers = tuple(torch.optim.Adam(
-                N.parameters(), lr=0.0001) for N in nnets)
+                N.parameters(), lr=0.001) for N in nnets)
             return nnets, optimisers
         else:
             return nnets
 
-    def __compareToCurrentBest(self, trainedNets, numberOfGames=500, searchesPerMove=75):
+    def __compareToCurrentBest(self, trainedNets, numberOfGames=20, searchesPerMove=50):
         print("Evaluating network")
         previousNets = self.__loadNNets(self.CURRENT_BEST_NNET)
         wins, losses = 0, 0
@@ -187,15 +190,17 @@ class Agent():
         return wins, losses
 
     def __saveNNets(self, nnets, name):
-        name.replace(".pth", "a.pth")
+        name = name.replace(".pth", "a.pth")
         nnets[0].save(name)
 
-        name.replace("a.pth", "b.pth")
+        name = name.replace("a.pth", "b.pth")
         nnets[1].save(name)
 
-        name.replace("b.pth", "c.pth")
+        name = name.replace("b.pth", "c.pth")
         nnets[2].save(name)
 
 
 if __name__ == "__main__":
-    Agent().train()
+    agent = Agent()
+    while True:
+        agent.train()
